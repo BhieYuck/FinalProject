@@ -1,60 +1,152 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-class ReportsScreen extends StatelessWidget {
-  const ReportsScreen({super.key});
+import '../models/item_model.dart';
+
+import '../widgets/app_header.dart';
+
+class ReportsScreen
+    extends StatelessWidget {
+
+  final List<ItemModel> items;
+
+  const ReportsScreen({
+    super.key,
+    required this.items,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+      BuildContext context) {
 
-    return SafeArea(
+    return Scaffold(
 
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+      appBar: const AppHeader(
+        title: "Reports",
+      ),
+
+      body: Padding(
+
+        padding:
+            const EdgeInsets.all(
+          12,
+        ),
 
         child: Column(
 
           children: [
 
-            const Text(
-              "Reports",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+            Row(
+
+              children: [
+
+                tab("Daily"),
+                tab("Weekly"),
+                tab("Monthly"),
+
+              ],
+            ),
+
+            const SizedBox(
+              height: 20,
+            ),
+
+            SizedBox(
+
+              height: 250,
+
+              child:
+                  BarChart(
+
+                BarChartData(
+
+                  barGroups:
+                      List.generate(
+
+                    items.length,
+
+                    (index) {
+
+                      final item =
+                          items[
+                              index];
+
+                      return BarChartGroupData(
+
+                        x: index,
+
+                        barRods: [
+
+                          BarChartRodData(
+                            toY: item
+                                .usedCount
+                                .toDouble(),
+                          )
+
+                        ],
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(
+              height: 20,
+            ),
 
             Container(
 
-              height: 200,
-              width: double.infinity,
-
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius:
-                BorderRadius.circular(20),
+              padding:
+                  const EdgeInsets
+                      .all(
+                12,
               ),
 
-              child: const Center(
-                child: Text("Chart Placeholder"),
-              ),
-            ),
+              color:
+                  Colors.grey
+                      .shade300,
 
-            const SizedBox(height: 20),
+              child:
+                  const Column(
 
-            const Align(
-              alignment: Alignment.centerLeft,
+                crossAxisAlignment:
+                    CrossAxisAlignment
+                        .start,
 
-              child: Text(
-                "Summary\n\n"
-                "• Total Used: 150\n"
-                "• Most Used: Rice\n"
-                "• Last Used: Sugar",
+                children: [
+
+                  Text(
+                      "Summary"),
+
+                  Text(
+                      "• Most Used: Soap"),
+
+                  Text(
+                      "• Last Used: Noodles"),
+
+                ],
               ),
             )
 
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget tab(
+      String text) {
+
+    return Expanded(
+
+      child:
+          ElevatedButton(
+
+        onPressed: () {},
+
+        child: Text(
+          text,
         ),
       ),
     );

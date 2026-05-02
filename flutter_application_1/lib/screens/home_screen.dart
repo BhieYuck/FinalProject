@@ -1,38 +1,37 @@
 import 'package:flutter/material.dart';
 
-import '../constants/app_colors.dart';
+import '../models/item_model.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+
+  final List<ItemModel> items;
+
+  final Function(
+      String,
+      int,
+      String,
+      ) onAdd;
+
+  const HomeScreen({
+    super.key,
+    required this.items,
+    required this.onAdd,
+  });
 
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
+    final lowStock =
+        items
+            .where(
+                (e) => e.isLowStock)
+            .length;
 
-      backgroundColor: Colors.grey.shade100,
+    return SafeArea(
 
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-
-        title: const Text(
-          "StockTrack",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Icon(Icons.notifications),
-          )
-        ],
-      ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      child: Padding(
+        padding:
+        const EdgeInsets.all(16),
 
         child: Column(
 
@@ -42,160 +41,162 @@ class HomeScreen extends StatelessWidget {
               "Hello, User!",
               style: TextStyle(
                 fontSize: 28,
-                fontWeight: FontWeight.bold,
+                fontWeight:
+                FontWeight.bold,
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(
+                height: 20),
 
             Row(
-              children: const [
 
-                Expanded(
-                  child: StatsCard(
-                    "Total Items",
-                    "100",
-                  ),
-                ),
+              children: [
 
-                SizedBox(width: 8),
+                stat(
+                    "Items",
+                    items.length
+                        .toString()),
 
-                Expanded(
-                  child: StatsCard(
-                    "Low Stock",
-                    "9",
-                  ),
-                ),
-
-                SizedBox(width: 8),
-
-                Expanded(
-                  child: StatsCard(
-                    "Categories",
-                    "20",
-                  ),
-                ),
+                stat(
+                    "Low",
+                    lowStock
+                        .toString()),
 
               ],
             ),
 
-            const SizedBox(height: 20),
+            const Spacer(),
 
-            Expanded(
-              child: Container(
+            ElevatedButton(
 
-                padding: const EdgeInsets.all(16),
+              onPressed: () {
 
-                decoration: BoxDecoration(
-                  color: AppColors.secondary,
-                  borderRadius: BorderRadius.circular(25),
-                ),
+                showDialog(
 
-                child: const Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
+                  context: context,
 
-                  children: [
+                  builder: (_){
 
-                    Text(
-                      "Today's Recent Activity",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                    final name =
+                    TextEditingController();
+
+                    final qty =
+                    TextEditingController();
+
+                    return AlertDialog(
+
+                      title:
+                      const Text(
+                          "Add Item"),
+
+                      content:
+                      Column(
+
+                        mainAxisSize:
+                        MainAxisSize
+                            .min,
+
+                        children: [
+
+                          TextField(
+                            controller:
+                            name,
+
+                            decoration:
+                            const InputDecoration(
+                              hintText:
+                              "Name",
+                            ),
+                          ),
+
+                          TextField(
+                            controller:
+                            qty,
+
+                            decoration:
+                            const InputDecoration(
+                              hintText:
+                              "Qty",
+                            ),
+                          ),
+
+                        ],
                       ),
-                    ),
 
-                    SizedBox(height: 20),
+                      actions: [
 
-                    Text("Added : Rice (10pcs)"),
-                    SizedBox(height: 10),
-                    Text("Updated : Soap (5pcs)"),
+                        ElevatedButton(
 
-                  ],
-                ),
-              ),
+                          onPressed:
+                              () {
+
+                            onAdd(
+                              name.text,
+
+                              int.parse(
+                                  qty.text),
+
+                              "Food",
+                            );
+
+                            Navigator.pop(
+                                context);
+
+                          },
+
+                          child:
+                          const Text(
+                              "Save"),
+                        )
+
+                      ],
+                    );
+
+                  },
+                );
+
+              },
+
+              child: const Text(
+                  "Add Item"),
             ),
-
-            const SizedBox(height: 16),
-
-            SizedBox(
-              width: double.infinity,
-
-              child: ElevatedButton.icon(
-
-                onPressed: () {},
-
-                icon: const Icon(Icons.add),
-
-                label: const Text(
-                  "Add Item",
-                ),
-
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                  AppColors.primary,
-
-                  foregroundColor:
-                  Colors.white,
-                ),
-              ),
-            )
 
           ],
         ),
       ),
     );
   }
-}
 
-class StatsCard extends StatelessWidget {
+  Widget stat(
+      String title,
+      String value,
+      ) {
 
-  final String title;
-  final String value;
+    return Expanded(
+      child: Card(
 
-  const StatsCard(
-      this.title,
-      this.value,
-      {super.key});
+        child: Padding(
+          padding:
+          const EdgeInsets.all(16),
 
-  @override
-  Widget build(BuildContext context) {
+          child: Column(
 
-    return Container(
+            children: [
 
-      padding: const EdgeInsets.all(10),
+              Text(title),
 
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius:
-        BorderRadius.circular(10),
-      ),
+              Text(
+                value,
+                style:
+                const TextStyle(
+                  fontSize: 20,
+                ),
+              ),
 
-      child: Column(
-
-        children: [
-
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-            ),
+            ],
           ),
-
-          const SizedBox(height: 8),
-
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight:
-              FontWeight.bold,
-            ),
-          ),
-
-        ],
+        ),
       ),
     );
   }

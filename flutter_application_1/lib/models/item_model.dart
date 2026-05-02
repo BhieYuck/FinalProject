@@ -1,11 +1,41 @@
-import 'package:flutter/material.dart';
+class ItemModel {
 
-class AppColors {
-  static const primary = Color(0xff0D8BDB);
-  static const secondary = Color(0xff5AA9E6);
-  static const background = Color(0xffF4F4F4);
+  String name;
+  int quantity;
+  String category;
+  int usedCount;
 
-  static const warning = Colors.orange;
-  static const danger = Colors.red;
-  static const success = Colors.green;
+  DateTime expiryDate;
+
+  ItemModel({
+    required this.name,
+    required this.quantity,
+    required this.category,
+    required this.usedCount,
+    required this.expiryDate,
+  });
+
+  bool get isLowStock => quantity <= 5;
+
+  String get expiryText {
+
+    final days =
+        expiryDate
+            .difference(
+            DateTime.now())
+            .inDays;
+
+    if (days <= 0) {
+      return "Expired";
+    }
+
+    if (days < 30) {
+      return "Expires in $days days";
+    }
+
+    final weeks =
+        (days / 7).floor();
+
+    return "Expires in $weeks weeks";
+  }
 }

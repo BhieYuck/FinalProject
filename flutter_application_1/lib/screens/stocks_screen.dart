@@ -1,60 +1,172 @@
 import 'package:flutter/material.dart';
 
-class StocksScreen extends StatelessWidget {
-  const StocksScreen({super.key});
+import '../models/item_model.dart';
+
+import '../widgets/app_header.dart';
+import '../widgets/custom_card.dart';
+
+class StocksScreen
+    extends StatelessWidget {
+
+  final List<ItemModel> items;
+
+  final Function(
+    ItemModel,
+  ) onRestock;
+
+  const StocksScreen({
+    super.key,
+    required this.items,
+    required this.onRestock,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+      BuildContext context) {
 
-    return SafeArea(
+    final low =
+        items.where(
+      (e) => e.isLowStock,
+    );
 
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+    return Scaffold(
 
-        child: Column(
+      appBar: const AppHeader(
+        title: "Stocks",
+      ),
+
+      body: Padding(
+
+        padding:
+            const EdgeInsets.all(
+          12,
+        ),
+
+        child: ListView(
 
           children: [
 
-            const Text(
-              "Stocks",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
+            section(
+                "Low Stocks"),
+
+            ...low.map((e) {
+
+              return CustomCard(
+
+                child: Row(
+
+                  mainAxisAlignment:
+                      MainAxisAlignment
+                          .spaceBetween,
+
+                  children: [
+
+                    Text(
+                      "${e.name}: ${e.quantity} pcs left",
+                    ),
+
+                    IconButton(
+
+                      onPressed:
+                          () {
+
+                        onRestock(
+                            e);
+
+                      },
+
+                      icon:
+                          const Icon(
+                        Icons.add_circle,
+                        color: Colors.orange,
+                      ),
+                    )
+
+                  ],
+                ),
+              );
+            }),
+
+            const SizedBox(
+              height: 20,
             ),
 
-            const SizedBox(height: 20),
+            section(
+                "Expiry Alerts"),
 
-            const ListTile(
-              title: Text("Soap"),
-              subtitle: Text("2 pcs left"),
-              trailing: Icon(
-                Icons.warning,
-                color: Colors.orange,
-              ),
-            ),
+            ...items.map((e) {
 
-            const ListTile(
-              title: Text("Coffee"),
-              subtitle: Text("2 pcs left"),
-              trailing: Icon(
-                Icons.warning,
-                color: Colors.orange,
-              ),
-            ),
+              return CustomCard(
 
-            const Divider(),
+                child: Row(
 
-            const ListTile(
-              title: Text("Milk"),
-              subtitle: Text("Expires in 2 days"),
-              trailing: Icon(
-                Icons.remove_circle,
-                color: Colors.red,
-              ),
-            ),
+                  mainAxisAlignment:
+                      MainAxisAlignment
+                          .spaceBetween,
+
+                  children: [
+
+                    Text(
+                        e.name),
+
+                    Text(
+                        e.expiryText),
+
+                  ],
+                ),
+              );
+            })
 
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget section(
+      String text) {
+
+    return Container(
+
+      margin:
+          const EdgeInsets.only(
+        bottom: 12,
+      ),
+
+      padding:
+          const EdgeInsets.all(
+        8,
+      ),
+
+      decoration:
+          BoxDecoration(
+
+        color: Colors.blue,
+
+        borderRadius:
+            BorderRadius.circular(
+          12,
+        ),
+      ),
+
+      child: Center(
+
+        child: Text(
+
+          text,
+
+          style:
+              const TextStyle(
+
+            color:
+                Colors.white,
+
+            fontWeight:
+                FontWeight.bold,
+
+            fontSize:
+                20,
+          ),
         ),
       ),
     );
