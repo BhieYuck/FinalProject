@@ -6,34 +6,53 @@ class ReportsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
+    return SafeArea(
 
-      appBar: AppBar(
-        title: const Text("Reports"),
-      ),
-
-      body: const Padding(
-        padding: EdgeInsets.all(20),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
 
         child: Column(
 
-          crossAxisAlignment: CrossAxisAlignment.start,
-
           children: [
 
-            Text(
-              "Summary",
+            const Text(
+              "Reports",
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
             ),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 30),
 
-            Text("• Total Used: 150"),
-            Text("• Most Used: Rice"),
-            Text("• Last Used: Sugar"),
+            Container(
+
+              height: 200,
+              width: double.infinity,
+
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius:
+                BorderRadius.circular(20),
+              ),
+
+              child: const Center(
+                child: Text("Chart Placeholder"),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            const Align(
+              alignment: Alignment.centerLeft,
+
+              child: Text(
+                "Summary\n\n"
+                "• Total Used: 150\n"
+                "• Most Used: Rice\n"
+                "• Last Used: Sugar",
+              ),
+            )
 
           ],
         ),
