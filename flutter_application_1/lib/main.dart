@@ -16,23 +16,19 @@ class StockTrackApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "StockTrack",
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
-      home: const MainNavigation(),
+      home: const MobileFrame(),
     );
   }
 }
 
-class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+class MobileFrame extends StatefulWidget {
+  const MobileFrame({super.key});
 
   @override
-  State<MainNavigation> createState() => _MainNavigationState();
+  State<MobileFrame> createState() => _MobileFrameState();
 }
 
-class _MainNavigationState extends State<MainNavigation> {
+class _MobileFrameState extends State<MobileFrame> {
 
   int currentIndex = 0;
 
@@ -45,40 +41,69 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      body: screens[currentIndex],
+      backgroundColor: Colors.grey.shade300,
 
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
+      body: Center(
+        child: Container(
+          width: 390,
+          height: 844,
 
-        onDestinationSelected: (value){
-          setState(() {
-            currentIndex=value;
-          });
-        },
-
-        destinations: const [
-
-          NavigationDestination(
-            icon: Icon(Icons.home),
-            label: "Home",
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 20,
+                color: Colors.black.withOpacity(.15),
+              ),
+            ],
           ),
 
-          NavigationDestination(
-            icon: Icon(Icons.inventory),
-            label: "Inventory",
-          ),
+          clipBehavior: Clip.antiAlias,
 
-          NavigationDestination(
-            icon: Icon(Icons.shopping_cart),
-            label: "Stock",
-          ),
+          child: Scaffold(
 
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart),
-            label: "Reports",
+            body: screens[currentIndex],
+
+            bottomNavigationBar: NavigationBar(
+
+              height: 75,
+              selectedIndex: currentIndex,
+
+              onDestinationSelected: (value){
+                setState(() {
+                  currentIndex=value;
+                });
+              },
+
+              destinations: const [
+
+                NavigationDestination(
+                  icon: Icon(Icons.home),
+                  label: "Home",
+                ),
+
+                NavigationDestination(
+                  icon: Icon(Icons.inventory),
+                  label: "Inventory",
+                ),
+
+                NavigationDestination(
+                  icon: Icon(Icons.shopping_cart),
+                  label: "Stock",
+                ),
+
+                NavigationDestination(
+                  icon: Icon(Icons.bar_chart),
+                  label: "Reports",
+                ),
+
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
