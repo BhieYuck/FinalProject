@@ -6,30 +6,76 @@ class InventoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final items = [
-      "Rice",
-      "Soap",
-      "Noodles",
-    ];
+    return SafeArea(
 
-    return Scaffold(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
 
-      appBar: AppBar(
-        title: const Text("Inventory"),
+        child: Column(
+
+          children: [
+
+            const Text(
+              "Inventory",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Search...",
+                prefixIcon: const Icon(Icons.search),
+
+                border: OutlineInputBorder(
+                  borderRadius:
+                  BorderRadius.circular(30),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Expanded(
+              child: ListView(
+
+                children: const [
+
+                  ItemTile("Rice","20 pcs"),
+                  ItemTile("Soap","8 pcs"),
+                  ItemTile("Noodles","0 pcs"),
+
+                ],
+              ),
+            )
+
+          ],
+        ),
       ),
+    );
+  }
+}
 
-      body: ListView.builder(
+class ItemTile extends StatelessWidget {
 
-        itemCount: items.length,
+  final String name;
+  final String qty;
 
-        itemBuilder: (_, index){
+  const ItemTile(
+      this.name,
+      this.qty,
+      {super.key});
 
-          return ListTile(
-            title: Text(items[index]),
-            trailing: const Text("20 pcs"),
-          );
+  @override
+  Widget build(BuildContext context) {
 
-        },
+    return Card(
+      child: ListTile(
+        title: Text(name),
+        trailing: Text(qty),
       ),
     );
   }

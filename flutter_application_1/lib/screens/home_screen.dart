@@ -9,12 +9,26 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+
+      backgroundColor: Colors.grey.shade100,
 
       appBar: AppBar(
-        title: const Text("StockTrack"),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+
+        title: const Text(
+          "StockTrack",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: Icon(Icons.notifications),
+          )
+        ],
       ),
 
       body: Padding(
@@ -27,7 +41,7 @@ class HomeScreen extends StatelessWidget {
             const Text(
               "Hello, User!",
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -35,37 +49,97 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
               children: const [
 
-                InfoCard("Total", "100"),
-                InfoCard("Low", "9"),
-                InfoCard("Categories", "20"),
+                Expanded(
+                  child: StatsCard(
+                    "Total Items",
+                    "100",
+                  ),
+                ),
+
+                SizedBox(width: 8),
+
+                Expanded(
+                  child: StatsCard(
+                    "Low Stock",
+                    "9",
+                  ),
+                ),
+
+                SizedBox(width: 8),
+
+                Expanded(
+                  child: StatsCard(
+                    "Categories",
+                    "20",
+                  ),
+                ),
 
               ],
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
 
             Expanded(
               child: Container(
-                width: double.infinity,
 
                 padding: const EdgeInsets.all(16),
 
                 decoration: BoxDecoration(
                   color: AppColors.secondary,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(25),
                 ),
 
-                child: const Text(
-                  "Recent Activity\n\n"
-                  "Added: Rice\n"
-                  "Updated: Soap",
+                child: const Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+
+                  children: [
+
+                    Text(
+                      "Today's Recent Activity",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+
+                    SizedBox(height: 20),
+
+                    Text("Added : Rice (10pcs)"),
+                    SizedBox(height: 10),
+                    Text("Updated : Soap (5pcs)"),
+
+                  ],
                 ),
               ),
             ),
+
+            const SizedBox(height: 16),
+
+            SizedBox(
+              width: double.infinity,
+
+              child: ElevatedButton.icon(
+
+                onPressed: () {},
+
+                icon: const Icon(Icons.add),
+
+                label: const Text(
+                  "Add Item",
+                ),
+
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                  AppColors.primary,
+
+                  foregroundColor:
+                  Colors.white,
+                ),
+              ),
+            )
 
           ],
         ),
@@ -74,42 +148,54 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class InfoCard extends StatelessWidget {
+class StatsCard extends StatelessWidget {
 
   final String title;
   final String value;
 
-  const InfoCard(
+  const StatsCard(
       this.title,
       this.value,
-      {super.key}
-      );
+      {super.key});
 
   @override
   Widget build(BuildContext context) {
 
-    return Card(
+    return Container(
 
-      child: SizedBox(
-        width: 100,
-        height: 70,
+      padding: const EdgeInsets.all(10),
 
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius:
+        BorderRadius.circular(10),
+      ),
 
-          children: [
+      child: Column(
 
-            Text(title),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            )
+        children: [
 
-          ],
-        ),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight:
+              FontWeight.bold,
+            ),
+          ),
+
+        ],
       ),
     );
   }
