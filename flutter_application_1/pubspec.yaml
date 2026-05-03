@@ -1,6 +1,7 @@
-name: stocktrack_app
-description: Mobile Stock Management App
-publish_to: 'none'
+name: flutter_application_1
+description: StockTrack App
+
+publish_to: "none"
 
 version: 1.0.0+1
 
@@ -13,9 +14,6 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
-  # Charts for Reports screen
-  fl_chart: ^0.68.0
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -23,5 +21,4 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
 flutter:
-
   uses-material-design: true
