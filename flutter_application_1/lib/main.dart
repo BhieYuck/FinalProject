@@ -24,16 +24,8 @@ class StockTrackApp extends StatelessWidget {
       debugShowCheckedModeBanner:
       false,
 
-      title: "StockTrack",
-
       theme: ThemeData(
-
         useMaterial3: true,
-
-        scaffoldBackgroundColor:
-        const Color(0xffF8FAFC),
-
-        fontFamily: "Arial",
       ),
 
       home:
@@ -61,8 +53,7 @@ class _MainNavigationState
 
   int currentIndex = 0;
 
-  final List<Widget>
-  screens = const [
+  final screens = const [
 
     HomeScreen(),
 
@@ -80,119 +71,119 @@ class _MainNavigationState
 
     return Scaffold(
 
-      body:
-      SafeArea(
+      backgroundColor:
+      Colors.grey.shade300,
 
-        child:
-        screens[
-        currentIndex],
-      ),
+      body: Center(
 
-      bottomNavigationBar:
-      Container(
+        child: Container(
 
-        decoration:
-        BoxDecoration(
+          width: 390,
+          height: 844,
 
-          color:
-          Colors.white,
+          decoration:
+          BoxDecoration(
 
-          boxShadow: [
+            color:
+            const Color(
+                0xffF8FAFC),
 
-            BoxShadow(
+            borderRadius:
+            BorderRadius.circular(
+                35),
 
-              color:
-              Colors.grey
-                  .withOpacity(.12),
+            boxShadow: [
 
-              blurRadius: 10,
+              BoxShadow(
 
+                color:
+                Colors.black
+                    .withOpacity(.15),
+
+                blurRadius:
+                20,
+
+              ),
+
+            ],
+          ),
+
+          clipBehavior:
+          Clip.antiAlias,
+
+          child: Scaffold(
+
+            body:
+            SafeArea(
+
+              child:
+              screens[
+              currentIndex],
             ),
 
-          ],
-        ),
+            bottomNavigationBar:
+            BottomNavigationBar(
 
-        child:
-        BottomNavigationBar(
+              currentIndex:
+              currentIndex,
 
-          currentIndex:
-          currentIndex,
+              onTap:
+                  (index){
 
-          onTap:
-              (index){
+                setState(() {
 
-            setState(() {
+                  currentIndex =
+                      index;
 
-              currentIndex =
-                  index;
+                });
 
-            });
+              },
 
-          },
+              type:
+              BottomNavigationBarType
+                  .fixed,
 
-          type:
-          BottomNavigationBarType
-              .fixed,
+              selectedItemColor:
+              const Color(
+                  0xff2563EB),
 
-          backgroundColor:
-          Colors.white,
+              items: const [
 
-          selectedItemColor:
-          const Color(
-              0xff2563EB),
+                BottomNavigationBarItem(
+                  icon:
+                  Icon(
+                      Icons.home),
+                  label:
+                  "Home",
+                ),
 
-          unselectedItemColor:
-          Colors.grey,
+                BottomNavigationBarItem(
+                  icon:
+                  Icon(
+                      Icons.inventory_2),
+                  label:
+                  "Inventory",
+                ),
 
-          selectedFontSize:
-          12,
+                BottomNavigationBarItem(
+                  icon:
+                  Icon(
+                      Icons.swap_horiz),
+                  label:
+                  "Stock",
+                ),
 
-          unselectedFontSize:
-          12,
+                BottomNavigationBarItem(
+                  icon:
+                  Icon(
+                      Icons.bar_chart),
+                  label:
+                  "Reports",
+                ),
 
-          items: const [
-
-            BottomNavigationBarItem(
-
-              icon:
-              Icon(
-                  Icons.home),
-
-              label:
-              "Home",
+              ],
             ),
-
-            BottomNavigationBarItem(
-
-              icon:
-              Icon(
-                  Icons.inventory_2),
-
-              label:
-              "Inventory",
-            ),
-
-            BottomNavigationBarItem(
-
-              icon:
-              Icon(
-                  Icons.swap_horiz),
-
-              label:
-              "Stock",
-            ),
-
-            BottomNavigationBarItem(
-
-              icon:
-              Icon(
-                  Icons.bar_chart),
-
-              label:
-              "Reports",
-            ),
-
-          ],
+          ),
         ),
       ),
     );
