@@ -1,285 +1,291 @@
 import 'package:flutter/material.dart';
 
 import '../data/app_data.dart';
-import '../widgets/app_header.dart';
 
-class StockScreen extends StatefulWidget {
-  const StockScreen({super.key});
+import '../models/item_model.dart';
+import '../models/transaction_model.dart';
+
+import '../widgets/app_header.dart';
+import '../widgets/mobile_frame.dart';
+import '../widgets/category_tab.dart';
+import '../widgets/stock_card.dart';
+
+class StockScreen
+    extends StatefulWidget {
+
+  const StockScreen({
+    super.key,
+  });
 
   @override
-  State<StockScreen> createState() =>
+  State<StockScreen>
+  createState() =>
       _StockScreenState();
 }
 
 class _StockScreenState
     extends State<StockScreen> {
 
-  String filter = "All";
+  String selectedTab =
+      "All";
 
-  @override
-  Widget build(BuildContext context) {
+  String selectedType =
+      "In";
 
-    final filtered =
-    transactions.where(
-            (tx) {
+  ItemModel?
+  selectedItem;
 
-          if (filter == "All") {
-            return true;
-          }
+  final TextEditingController
+  quantityController =
+  TextEditingController();
 
-          return tx["type"] == filter;
+  List<TransactionModel>
+  get filteredTransactions {
 
-        }).toList();
+    if(
+    selectedTab ==
+        "All"){
 
-    return Scaffold(
-
-      backgroundColor:
-      const Color(0xffF8FAFC),
-
-      appBar:
-      const AppHeader(
-        title: "Stock Movement",
-      ),
-
-      floatingActionButton:
-      FloatingActionButton(
-
-        backgroundColor:
-        const Color(0xff2563EB),
-
-        onPressed:
-        addTransaction,
-
-        child:
-        const Icon(Icons.add),
-      ),
-
-      body: Padding(
-
-        padding:
-        const EdgeInsets.all(16),
-
-        child: Column(
-
-          children: [
-
-            Row(
-
-              children: [
-
-                buildTab("All"),
-
-                buildTab("In"),
-
-                buildTab("Out"),
-
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            Expanded(
-
-              child:
-              ListView.builder(
-
-                itemCount:
-                filtered.length,
-
-                itemBuilder:
-                    (_, index) {
-
-                  final tx =
-                  filtered[index];
-
-                  final isIn =
-                      tx["type"] == "In";
-
-                  return Card(
-
-                    shape:
-                    RoundedRectangleBorder(
-
-                      borderRadius:
-                      BorderRadius.circular(20),
-                    ),
-
-                    child:
-                    ListTile(
-
-                      leading:
-                      CircleAvatar(
-
-                        backgroundColor:
-
-                        isIn
-
-                            ? Colors.green
-                                .withOpacity(.15)
-
-                            : Colors.red
-                                .withOpacity(.15),
-
-                        child:
-                        Icon(
-
-                          isIn
-
-                              ? Icons.arrow_downward
-
-                              : Icons.arrow_upward,
-
-                          color:
-
-                          isIn
-
-                              ? Colors.green
-
-                              : Colors.red,
-                        ),
-                      ),
-
-                      title:
-                      Text(
-
-                        tx["name"],
-
-                        style:
-                        const TextStyle(
-
-                          fontWeight:
-                          FontWeight.bold,
-                        ),
-                      ),
-
-                      subtitle:
-                      Text(tx["date"]),
-
-                      trailing:
-                      Text(
-
-                        isIn
-
-                            ? "+${tx["qty"]}"
-
-                            : "-${tx["qty"]}",
-
-                        style:
-                        TextStyle(
-
-                          fontWeight:
-                          FontWeight.bold,
-
-                          color:
-
-                          isIn
-
-                              ? Colors.green
-
-                              : Colors.red,
-
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildTab(
-      String text) {
-
-    final selected =
-        filter == text;
-
-    return Expanded(
-
-      child: Padding(
-
-        padding:
-        const EdgeInsets.symmetric(
-            horizontal: 4),
-
-        child:
-        ElevatedButton(
-
-          onPressed: () {
-
-            setState(() {
-
-              filter =
-                  text;
-
-            });
-
-          },
-
-          style:
-          ElevatedButton
-              .styleFrom(
-
-            backgroundColor:
-
-            selected
-
-                ? const Color(
-                0xff2563EB)
-
-                : Colors.white,
-
-            foregroundColor:
-
-            selected
-
-                ? Colors.white
-
-                : Colors.black,
-
-            elevation: 0,
-
-            shape:
-            RoundedRectangleBorder(
-
-              borderRadius:
-              BorderRadius.circular(
-                  20),
-            ),
-          ),
-
-          child:
-          Text(text),
-        ),
-      ),
-    );
-  }
-
-  void addTransaction() {
-
-    if (inventory.isEmpty) {
-      return;
+      return transactions;
     }
 
-    String itemName =
-    inventory.first["name"]
-        as String;
+    return transactions.where(
+            (transaction){
 
-    String type = "In";
+          return
 
-    final qtyController =
-    TextEditingController();
+              transaction
+                  .type
+
+                  ==
+
+                  selectedTab;
+
+        }).toList();
+  }
+
+  @override
+  void initState(){
+
+    super.initState();
+
+    if(
+    inventory
+        .isNotEmpty){
+
+      selectedItem =
+      inventory.first;
+
+    }
+  }
+
+  @override
+  Widget build(
+      BuildContext context) {
+
+    return MobileFrame(
+
+      child:
+      Scaffold(
+
+        backgroundColor:
+        const Color(
+            0xffF5F7FB),
+
+        appBar:
+        const AppHeader(
+          title:
+          "Stock",
+        ),
+
+        floatingActionButton:
+        FloatingActionButton(
+
+          backgroundColor:
+          const Color(
+              0xff2563EB),
+
+          onPressed:
+          showTransactionDialog,
+
+          child:
+          const Icon(
+              Icons.add),
+        ),
+
+        body:
+        Padding(
+
+          padding:
+          const EdgeInsets.all(
+              16),
+
+          child:
+          Column(
+
+            children: [
+
+              Row(
+
+                mainAxisAlignment:
+                MainAxisAlignment
+                    .spaceBetween,
+
+                children: [
+
+                  CategoryTab(
+
+                    text:
+                    "All",
+
+                    active:
+
+                    selectedTab
+                        ==
+                        "All",
+
+                    onTap:(){
+
+                      setState(() {
+
+                        selectedTab =
+                        "All";
+
+                      });
+
+                    },
+                  ),
+
+                  CategoryTab(
+
+                    text:
+                    "In",
+
+                    active:
+
+                    selectedTab
+                        ==
+                        "In",
+
+                    onTap:(){
+
+                      setState(() {
+
+                        selectedTab =
+                        "In";
+
+                      });
+
+                    },
+                  ),
+
+                  CategoryTab(
+
+                    text:
+                    "Out",
+
+                    active:
+
+                    selectedTab
+                        ==
+                        "Out",
+
+                    onTap:(){
+
+                      setState(() {
+
+                        selectedTab =
+                        "Out";
+
+                      });
+
+                    },
+                  ),
+
+                ],
+              ),
+
+              const SizedBox(
+                  height: 20),
+
+              Expanded(
+
+                child:
+                ListView(
+
+                  children:
+
+                  filteredTransactions
+                      .reversed
+
+                      .map(
+
+                          (transaction){
+
+                        return StockCard(
+
+                          item:
+
+                          transaction
+                              .itemName,
+
+                          type:
+
+                          transaction
+                              .type,
+
+                          qty:
+
+                          transaction
+                              .quantity,
+
+                          date:
+
+                          transaction
+                              .date
+
+                              .toString()
+
+                              .substring(
+                              0,
+                              16),
+                        );
+
+                      }).toList(),
+                ),
+              ),
+
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void showTransactionDialog(){
+
+    quantityController
+        .clear();
+
+    selectedType =
+        "In";
+
+    if(
+    inventory
+        .isNotEmpty){
+
+      selectedItem =
+      inventory.first;
+
+    }
 
     showDialog(
 
-      context: context,
+      context:
+      context,
 
-      builder: (_) {
+      builder:
+          (_) {
 
         return AlertDialog(
 
@@ -303,39 +309,39 @@ class _StockScreenState
 
             children: [
 
-              DropdownButton<String>(
-
-                isExpanded: true,
+              DropdownButton<ItemModel>(
 
                 value:
-                itemName,
+                selectedItem,
+
+                isExpanded:
+                true,
 
                 items:
 
                 inventory.map(
-                        (item) {
 
-                      return DropdownMenuItem<String>(
+                        (item){
+
+                      return DropdownMenuItem(
 
                         value:
-                        item["name"]
-                        as String,
+                        item,
 
                         child:
                         Text(
-                            item["name"]),
+                            item.name),
                       );
 
                     }).toList(),
 
                 onChanged:
-                    (value) {
+                    (value){
 
                   setState(() {
 
-                    itemName =
-                    value
-                    as String;
+                    selectedItem =
+                        value;
 
                   });
 
@@ -347,21 +353,28 @@ class _StockScreenState
 
               DropdownButton<String>(
 
-                isExpanded: true,
-
                 value:
-                type,
+                selectedType,
+
+                isExpanded:
+                true,
 
                 items:
 
-                ["In", "Out"]
-                    .map(
+                [
 
-                        (e) {
+                  "In",
 
-                      return DropdownMenuItem<String>(
+                  "Out",
 
-                        value: e,
+                ].map(
+
+                        (e){
+
+                      return DropdownMenuItem(
+
+                        value:
+                        e,
 
                         child:
                         Text(e),
@@ -370,11 +383,11 @@ class _StockScreenState
                     }).toList(),
 
                 onChanged:
-                    (value) {
+                    (value){
 
                   setState(() {
 
-                    type =
+                    selectedType =
                     value
                     as String;
 
@@ -389,7 +402,7 @@ class _StockScreenState
               TextField(
 
                 controller:
-                qtyController,
+                quantityController,
 
                 keyboardType:
                 TextInputType.number,
@@ -399,9 +412,6 @@ class _StockScreenState
 
                   labelText:
                   "Quantity",
-
-                  border:
-                  OutlineInputBorder(),
                 ),
               ),
 
@@ -412,83 +422,8 @@ class _StockScreenState
 
             ElevatedButton(
 
-              onPressed: () {
-
-                if (qtyController
-                    .text
-                    .isEmpty) {
-                  return;
-                }
-
-                final qty =
-                int.parse(
-                    qtyController
-                        .text);
-
-                setState(() {
-
-                  transactions.add({
-
-                    "name":
-                    itemName,
-
-                    "type":
-                    type,
-
-                    "qty":
-                    qty,
-
-                    "date":
-                    "Now",
-
-                  });
-
-                  final item =
-                  inventory.firstWhere(
-
-                          (e) {
-
-                        return
-                            e["name"]
-                                ==
-                                itemName;
-
-                      });
-
-                  if (type == "In") {
-
-                    item["quantity"] +=
-                        qty;
-
-                  } else {
-
-                    item["quantity"] -=
-                        qty;
-
-                    if (item[
-                    "quantity"] <
-                        0) {
-
-                      item[
-                      "quantity"] = 0;
-                    }
-                  }
-
-                });
-
-                Navigator.pop(
-                    context);
-
-              },
-
-              style:
-              ElevatedButton
-                  .styleFrom(
-
-                backgroundColor:
-                const Color(
-                    0xff2563EB),
-              ),
+              onPressed:
+              saveTransaction,
 
               child:
               const Text(
@@ -499,5 +434,102 @@ class _StockScreenState
         );
       },
     );
+  }
+
+  void saveTransaction(){
+
+    if(
+    selectedItem
+        == null){
+
+      return;
+    }
+
+    if(
+    quantityController
+        .text
+        .isEmpty){
+
+      return;
+    }
+
+    final qty =
+    int.parse(
+
+        quantityController
+            .text);
+
+    if(
+    selectedType ==
+        "Out"
+
+        &&
+
+        selectedItem!
+            .quantity
+
+            <
+
+            qty){
+
+      return;
+    }
+
+    setState(() {
+
+      if(
+      selectedType
+          ==
+          "In"){
+
+        selectedItem!
+            .quantity +=
+            qty;
+      }
+
+      else{
+
+        selectedItem!
+            .quantity -=
+            qty;
+      }
+
+      transactions.add(
+
+        TransactionModel(
+
+          itemName:
+
+          selectedItem!
+              .name,
+
+          type:
+          selectedType,
+
+          quantity:
+          qty,
+
+          date:
+          DateTime.now(),
+        ),
+      );
+
+      activities.add(
+
+          "$selectedType ${selectedItem!.name}");
+
+    });
+
+    Navigator.pop(
+        context);
+  }
+
+  @override
+  void dispose(){
+
+    quantityController
+        .dispose();
+
+    super.dispose();
   }
 }

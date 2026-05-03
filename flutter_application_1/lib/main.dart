@@ -5,13 +5,14 @@ import 'screens/inventory_screen.dart';
 import 'screens/stocks_screen.dart';
 import 'screens/reports_screen.dart';
 
+import 'widgets/bottom_nav.dart';
+
 void main() {
-  runApp(
-    const StockTrackApp(),
-  );
+  runApp(const StockTrackApp());
 }
 
 class StockTrackApp extends StatelessWidget {
+
   const StockTrackApp({
     super.key,
   });
@@ -25,166 +26,84 @@ class StockTrackApp extends StatelessWidget {
       false,
 
       theme: ThemeData(
-        useMaterial3: true,
+
+        scaffoldBackgroundColor:
+        const Color(0xffF5F7FB),
+
+        useMaterial3:
+        true,
       ),
 
       home:
-      const MainNavigation(),
+      const MainScreen(),
     );
   }
 }
 
-class MainNavigation
-    extends StatefulWidget {
+class MainScreen extends StatefulWidget {
 
-  const MainNavigation({
+  const MainScreen({
     super.key,
   });
 
   @override
-  State<MainNavigation>
-  createState() =>
-      _MainNavigationState();
+  State<MainScreen> createState() =>
+      _MainScreenState();
 }
 
-class _MainNavigationState
-    extends State<
-        MainNavigation> {
+class _MainScreenState
+    extends State<MainScreen> {
 
   int currentIndex = 0;
 
-  final screens = const [
-
-    HomeScreen(),
-
-    InventoryScreen(),
-
-    StockScreen(),
-
-    ReportsScreen(),
-
-  ];
+  late final List<Widget> screens;
 
   @override
-  Widget build(
-      BuildContext context) {
+  void initState() {
+
+    super.initState();
+
+    screens = const [
+
+      HomeScreen(),
+
+      InventoryScreen(),
+
+      StockScreen(),
+
+      ReportsScreen(),
+
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     return Scaffold(
 
-      backgroundColor:
-      Colors.grey.shade300,
+      body:
+      SafeArea(
 
-      body: Center(
+        child:
+        screens[currentIndex],
+      ),
 
-        child: Container(
+      bottomNavigationBar:
+      BottomNav(
 
-          width: 390,
-          height: 844,
+        index:
+        currentIndex,
 
-          decoration:
-          BoxDecoration(
+        onTap:
+            (value){
 
-            color:
-            const Color(
-                0xffF8FAFC),
+          setState(() {
 
-            borderRadius:
-            BorderRadius.circular(
-                35),
+            currentIndex =
+                value;
 
-            boxShadow: [
-
-              BoxShadow(
-
-                color:
-                Colors.black
-                    .withOpacity(.15),
-
-                blurRadius:
-                20,
-
-              ),
-
-            ],
-          ),
-
-          clipBehavior:
-          Clip.antiAlias,
-
-          child: Scaffold(
-
-            body:
-            SafeArea(
-
-              child:
-              screens[
-              currentIndex],
-            ),
-
-            bottomNavigationBar:
-            BottomNavigationBar(
-
-              currentIndex:
-              currentIndex,
-
-              onTap:
-                  (index){
-
-                setState(() {
-
-                  currentIndex =
-                      index;
-
-                });
-
-              },
-
-              type:
-              BottomNavigationBarType
-                  .fixed,
-
-              selectedItemColor:
-              const Color(
-                  0xff2563EB),
-
-              items: const [
-
-                BottomNavigationBarItem(
-                  icon:
-                  Icon(
-                      Icons.home),
-                  label:
-                  "Home",
-                ),
-
-                BottomNavigationBarItem(
-                  icon:
-                  Icon(
-                      Icons.inventory_2),
-                  label:
-                  "Inventory",
-                ),
-
-                BottomNavigationBarItem(
-                  icon:
-                  Icon(
-                      Icons.swap_horiz),
-                  label:
-                  "Stock",
-                ),
-
-                BottomNavigationBarItem(
-                  icon:
-                  Icon(
-                      Icons.bar_chart),
-                  label:
-                  "Reports",
-                ),
-
-              ],
-            ),
-          ),
-        ),
+          });
+        },
       ),
     );
   }
