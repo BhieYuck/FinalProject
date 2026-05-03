@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/inventory_screen.dart';
-import 'screens/stocks_screen.dart';
+import 'screens/stock_screen.dart';
 import 'screens/reports_screen.dart';
 
 void main() {
