@@ -1,96 +1,76 @@
 import 'package:flutter/material.dart';
 
 import '../data/app_data.dart';
-
 import '../widgets/app_header.dart';
 import '../widgets/search_box.dart';
 import '../widgets/gradient_button.dart';
 
-class InventoryScreen
-    extends StatefulWidget {
-
-  const InventoryScreen({
-    super.key,
-  });
+class InventoryScreen extends StatefulWidget {
+  const InventoryScreen({super.key});
 
   @override
-  State<InventoryScreen>
-  createState() =>
+  State<InventoryScreen> createState() =>
       _InventoryScreenState();
 }
 
 class _InventoryScreenState
-    extends State<
-        InventoryScreen> {
+    extends State<InventoryScreen> {
 
   String search = "";
-
-  String category =
-      "All";
+  String category = "All";
 
   @override
-  Widget build(
-      BuildContext context) {
+  Widget build(BuildContext context) {
 
     final items =
-    inventory.where(
-            (item){
+    inventory.where((item) {
 
-          final nameMatch =
-          item["name"]
-              .toLowerCase()
-              .contains(
-              search
-                  .toLowerCase());
+      final nameMatch =
+      item["name"]
+          .toLowerCase()
+          .contains(
+          search.toLowerCase());
 
-          final categoryMatch =
+      final categoryMatch =
 
-          category=="All"
-
-              ||
+          category == "All" ||
 
               item["category"]
-                  ==
-                  category;
+                  == category;
 
-          return
-              nameMatch
-                  &&
-                  categoryMatch;
+      return
+          nameMatch &&
+              categoryMatch;
 
-        }).toList();
+    }).toList();
 
     return Scaffold(
 
       backgroundColor:
-      const Color(
-          0xffF8FAFC),
+      const Color(0xffF8FAFC),
 
       appBar:
       const AppHeader(
-        title:
-        "Inventory",
+        title: "Inventory",
       ),
 
       body: Padding(
 
         padding:
-        const EdgeInsets.all(
-            16),
+        const EdgeInsets.all(16),
 
-        child:
-        Column(
+        child: Column(
 
           children: [
 
             SearchBox(
 
-              onChanged:
-                  (value){
+              onChanged: (value) {
 
                 setState(() {
-                  search =
-                      value;
+
+                  search = value;
+
                 });
 
               },
@@ -103,14 +83,9 @@ class _InventoryScreenState
 
               children: [
 
-                tab(
-                    "All"),
-
-                tab(
-                    "Foods"),
-
-                tab(
-                    "Supplies"),
+                tab("All"),
+                tab("Foods"),
+                tab("Supplies"),
 
               ],
             ),
@@ -127,18 +102,16 @@ class _InventoryScreenState
                 items.length,
 
                 itemBuilder:
-                    (_, i){
+                    (_, i) {
 
                   final item =
                   items[i];
 
                   final qty =
-                  item[
-                  "quantity"];
+                  item["quantity"];
 
                   final threshold =
-                  item[
-                  "threshold"];
+                  item["threshold"];
 
                   String status =
                       "In Stock";
@@ -146,25 +119,18 @@ class _InventoryScreenState
                   Color color =
                   Colors.green;
 
-                  if(
-                  qty==0){
+                  if (qty == 0) {
 
-                    status =
-                    "Out";
-
-                    color =
-                    Colors.red;
+                    status = "Out";
+                    color = Colors.red;
 
                   }
 
-                  else if(
-                  qty<=threshold){
+                  else if (
+                  qty <= threshold) {
 
-                    status =
-                    "Low";
-
-                    color =
-                    Colors.orange;
+                    status = "Low";
+                    color = Colors.orange;
 
                   }
 
@@ -182,6 +148,20 @@ class _InventoryScreenState
 
                     child:
                     ListTile(
+
+                      onTap: () {
+
+                        editQuantity(
+                            item);
+
+                      },
+
+                      onLongPress: () {
+
+                        deleteItem(
+                            item);
+
+                      },
 
                       contentPadding:
                       const EdgeInsets.all(
@@ -214,8 +194,8 @@ class _InventoryScreenState
                         const EdgeInsets.symmetric(
 
                           horizontal: 10,
-
                           vertical: 6,
+
                         ),
 
                         decoration:
@@ -237,14 +217,12 @@ class _InventoryScreenState
 
                           style:
                           TextStyle(
-                            color:
-                            color,
+                            color: color,
                           ),
                         ),
                       ),
                     ),
                   );
-
                 },
               ),
             ),
@@ -268,12 +246,10 @@ class _InventoryScreenState
   }
 
   Widget tab(
-      String text){
+      String text) {
 
     final selected =
-        category
-            ==
-            text;
+        category == text;
 
     return Expanded(
 
@@ -285,6 +261,16 @@ class _InventoryScreenState
 
         child:
         ElevatedButton(
+
+          onPressed: () {
+
+            setState(() {
+
+              category = text;
+
+            });
+
+          },
 
           style:
           ElevatedButton
@@ -306,25 +292,7 @@ class _InventoryScreenState
                 ? Colors.white
 
                 : Colors.black,
-
-            shape:
-            RoundedRectangleBorder(
-
-              borderRadius:
-              BorderRadius.circular(
-                  18),
-            ),
           ),
-
-          onPressed:
-              (){
-
-            setState(() {
-              category =
-                  text;
-            });
-
-          },
 
           child:
           Text(text),
@@ -333,7 +301,7 @@ class _InventoryScreenState
     );
   }
 
-  void addItemModal(){
+  void addItemModal() {
 
     final name =
     TextEditingController();
@@ -348,18 +316,9 @@ class _InventoryScreenState
 
       context: context,
 
-      builder:
-          (_) {
+      builder: (_) {
 
         return AlertDialog(
-
-          shape:
-          RoundedRectangleBorder(
-
-            borderRadius:
-            BorderRadius.circular(
-                20),
-          ),
 
           title:
           const Text(
@@ -375,27 +334,25 @@ class _InventoryScreenState
 
               TextField(
 
-                controller:
-                name,
+                controller: name,
 
                 decoration:
                 const InputDecoration(
-                    labelText:
-                    "Name"),
+                  labelText: "Name",
+                ),
               ),
 
               TextField(
 
-                controller:
-                qty,
+                controller: qty,
 
                 keyboardType:
                 TextInputType.number,
 
                 decoration:
                 const InputDecoration(
-                    labelText:
-                    "Quantity"),
+                  labelText: "Quantity",
+                ),
               ),
 
             ],
@@ -405,8 +362,7 @@ class _InventoryScreenState
 
             ElevatedButton(
 
-              onPressed:
-                  (){
+              onPressed: () {
 
                 setState(() {
 
@@ -424,6 +380,7 @@ class _InventoryScreenState
 
                     "threshold":
                     5,
+
                   });
 
                 });
@@ -436,7 +393,142 @@ class _InventoryScreenState
               child:
               const Text(
                   "Save"),
-            )
+            ),
+
+          ],
+        );
+      },
+    );
+  }
+
+  void editQuantity(
+      Map<String, dynamic> item) {
+
+    final controller =
+    TextEditingController(
+
+      text:
+      item["quantity"]
+          .toString(),
+    );
+
+    showDialog(
+
+      context: context,
+
+      builder: (_) {
+
+        return AlertDialog(
+
+          title:
+          const Text(
+              "Edit Quantity"),
+
+          content:
+          TextField(
+
+            controller:
+            controller,
+
+            keyboardType:
+            TextInputType.number,
+
+            decoration:
+            const InputDecoration(
+
+              labelText:
+              "Quantity",
+
+            ),
+          ),
+
+          actions: [
+
+            ElevatedButton(
+
+              onPressed: () {
+
+                setState(() {
+
+                  item["quantity"] =
+                      int.parse(
+                          controller
+                              .text);
+
+                });
+
+                Navigator.pop(
+                    context);
+
+              },
+
+              child:
+              const Text(
+                  "Save"),
+            ),
+
+          ],
+        );
+      },
+    );
+  }
+
+  void deleteItem(
+      Map<String, dynamic> item) {
+
+    showDialog(
+
+      context: context,
+
+      builder: (_) {
+
+        return AlertDialog(
+
+          title:
+          const Text(
+              "Delete Item"),
+
+          content:
+          Text(
+
+              "Delete ${item["name"]}?"),
+
+          actions: [
+
+            TextButton(
+
+              onPressed: () {
+
+                Navigator.pop(
+                    context);
+
+              },
+
+              child:
+              const Text(
+                  "Cancel"),
+            ),
+
+            ElevatedButton(
+
+              onPressed: () {
+
+                setState(() {
+
+                  inventory.remove(
+                      item);
+
+                });
+
+                Navigator.pop(
+                    context);
+
+              },
+
+              child:
+              const Text(
+                  "Delete"),
+            ),
 
           ],
         );
