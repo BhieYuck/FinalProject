@@ -1,537 +1,635 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/app_header.dart';
+import 'package:fl_chart/fl_chart.dart';
 
-class ReportsScreen extends StatefulWidget {
-  const ReportsScreen({super.key});
+import '../data/app_data.dart';
+
+import '../models/transaction_model.dart';
+
+import '../widgets/app_header.dart';
+import '../widgets/mobile_frame.dart';
+import '../widgets/category_tab.dart';
+import '../widgets/summary_card.dart';
+
+class ReportsScreen
+    extends StatefulWidget {
+
+  const ReportsScreen({
+    super.key,
+  });
 
   @override
-  State<ReportsScreen> createState() =>
+  State<ReportsScreen>
+  createState() =>
       _ReportsScreenState();
 }
 
 class _ReportsScreenState
     extends State<ReportsScreen> {
 
-  String filter = "Weekly";
+  String selectedFilter =
+      "Today";
 
-  final Map<String, int> usageData = {
+  List<TransactionModel>
+  get filteredTransactions {
 
-    "Soap": 90,
-    "Shampoo": 70,
-    "Can Goods": 50,
-    "Noodles": 30,
+    final now =
+    DateTime.now();
 
-  };
+    return transactions.where(
+            (transaction){
+
+          final difference =
+
+          now.difference(
+              transaction.date)
+
+              .inDays;
+
+          if(
+          selectedFilter
+              ==
+              "Today"){
+
+            return
+                difference
+                <=
+                0;
+          }
+
+          if(
+          selectedFilter
+              ==
+              "Weekly"){
+
+            return
+                difference
+                <=
+                7;
+          }
+
+          return
+              difference
+              <=
+              30;
+
+        }).toList();
+  }
+
+  int get totalAdded {
+
+    int total = 0;
+
+    for(
+    final transaction
+    in
+    filteredTransactions){
+
+      if(
+      transaction.type
+          ==
+          "In"){
+
+        total +=
+            transaction
+                .quantity;
+      }
+    }
+
+    return total;
+  }
+
+  int get totalUsed {
+
+    int total = 0;
+
+    for(
+    final transaction
+    in
+    filteredTransactions){
+
+      if(
+      transaction.type
+          ==
+          "Out"){
+
+        total +=
+            transaction
+                .quantity;
+      }
+    }
+
+    return total;
+  }
+
+  String get mostUsedItem {
+
+    Map<String,int>
+    usage = {};
+
+    for(
+    final transaction
+    in
+    filteredTransactions){
+
+      if(
+      transaction.type
+          ==
+          "Out"){
+
+        usage.update(
+
+          transaction.itemName,
+
+              (value){
+
+            return
+                value
+                +
+                transaction.quantity;
+
+          },
+
+          ifAbsent:(){
+
+            return
+                transaction.quantity;
+
+          },
+        );
+      }
+    }
+
+    if(
+    usage.isEmpty){
+
+      return
+          "-";
+    }
+
+    String best =
+        usage.keys.first;
+
+    int max =
+    usage.values.first;
+
+    usage.forEach(
+            (key,value){
+
+          if(
+          value
+              >
+              max){
+
+            max =
+                value;
+
+            best =
+                key;
+          }
+
+        });
+
+    return best;
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+      BuildContext context) {
 
-    final totalUsed =
-        usageData.values.reduce(
-                (a, b) => a + b);
+    return MobileFrame(
 
-    final mostUsed =
-        usageData.entries.reduce(
-                (a, b) =>
-            a.value > b.value
-                ? a
-                : b);
+      child:
+      Scaffold(
 
-    return Scaffold(
+        backgroundColor:
+        const Color(
+            0xffF5F7FB),
 
-      backgroundColor:
-      const Color(0xffF8FAFC),
+        appBar:
+        const AppHeader(
+          title:
+          "Reports",
+        ),
 
-      appBar:
-      const AppHeader(
-        title: "Reports",
-      ),
+        body:
+        Padding(
 
-      body: Padding(
+          padding:
+          const EdgeInsets.all(
+              16),
 
-        padding:
-        const EdgeInsets.all(16),
+          child:
+          ListView(
 
-        child: ListView(
+            children: [
 
-          children: [
+              Row(
 
-            Row(
+                mainAxisAlignment:
+                MainAxisAlignment
+                    .spaceBetween,
 
-              children: [
+                children: [
 
-                filterTab("Today"),
-                filterTab("Weekly"),
-                filterTab("Monthly"),
+                  CategoryTab(
 
-              ],
-            ),
+                    text:
+                    "Today",
 
-            const SizedBox(height: 20),
+                    active:
 
-            const Text(
+                    selectedFilter
+                        ==
+                        "Today",
 
-              "Summary",
+                    onTap:(){
 
-              style: TextStyle(
+                      setState(() {
 
-                fontSize: 22,
-                fontWeight:
-                FontWeight.bold,
+                        selectedFilter =
+                        "Today";
 
-              ),
-            ),
+                      });
 
-            const SizedBox(height: 16),
+                    },
+                  ),
 
-            Row(
+                  CategoryTab(
 
-              children: [
+                    text:
+                    "Weekly",
 
-                summaryCard(
-                  "Total Added",
-                  "320",
-                  Colors.blue,
-                  Icons.add_box,
-                ),
+                    active:
 
-                const SizedBox(width: 12),
+                    selectedFilter
+                        ==
+                        "Weekly",
 
-                summaryCard(
-                  "Total Used",
-                  "$totalUsed",
-                  Colors.green,
-                  Icons.remove_circle,
-                ),
+                    onTap:(){
 
-              ],
-            ),
+                      setState(() {
 
-            const SizedBox(height: 12),
+                        selectedFilter =
+                        "Weekly";
 
-            summaryCard(
-              "Most Used",
-              mostUsed.key,
-              Colors.orange,
-              Icons.star,
-            ),
+                      });
 
-            const SizedBox(height: 24),
+                    },
+                  ),
 
-            const Text(
+                  CategoryTab(
 
-              "Most Used Items",
+                    text:
+                    "Monthly",
 
-              style: TextStyle(
+                    active:
 
-                fontSize: 20,
-                fontWeight:
-                FontWeight.bold,
+                    selectedFilter
+                        ==
+                        "Monthly",
 
-              ),
-            ),
+                    onTap:(){
 
-            const SizedBox(height: 20),
+                      setState(() {
 
-            Container(
+                        selectedFilter =
+                        "Monthly";
 
-              padding:
-              const EdgeInsets.all(16),
+                      });
 
-              decoration:
-              BoxDecoration(
-
-                color: Colors.white,
-
-                borderRadius:
-                BorderRadius.circular(20),
-
-                boxShadow: [
-
-                  BoxShadow(
-
-                    color:
-                    Colors.grey
-                        .withOpacity(.1),
-
-                    blurRadius: 8,
-
-                  )
+                    },
+                  ),
 
                 ],
               ),
 
-              child:
-              Column(
+              const SizedBox(
+                  height: 20),
 
-                children:
+              Row(
 
-                usageData.entries
-                    .map(
-                        (entry){
+                children: [
 
-                      return buildBar(
+                  SummaryCard(
 
-                        entry.key,
-                        entry.value,
+                    icon:
+                    Icons.add,
 
-                      );
+                    title:
+                    "Added",
 
-                    })
-                    .toList(),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            Row(
-
-              children: [
-
-                Expanded(
-
-                  child:
-                  exportButton(
-
-                    "Export PDF",
-                    Icons.picture_as_pdf,
-
-                  ),
-                ),
-
-                const SizedBox(width: 12),
-
-                Expanded(
-
-                  child:
-                  exportButton(
-
-                    "Export Excel",
-                    Icons.table_chart,
-
-                  ),
-                ),
-
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget filterTab(
-      String text) {
-
-    final selected =
-        filter == text;
-
-    return Expanded(
-
-      child: Padding(
-
-        padding:
-        const EdgeInsets.symmetric(
-            horizontal: 4),
-
-        child:
-        ElevatedButton(
-
-          onPressed: () {
-
-            setState(() {
-
-              filter = text;
-
-            });
-
-          },
-
-          style:
-          ElevatedButton
-              .styleFrom(
-
-            backgroundColor:
-
-            selected
-
-                ? const Color(
-                0xff2563EB)
-
-                : Colors.white,
-
-            foregroundColor:
-
-            selected
-
-                ? Colors.white
-
-                : Colors.black,
-
-            shape:
-            RoundedRectangleBorder(
-
-              borderRadius:
-              BorderRadius.circular(25),
-
-            ),
-          ),
-
-          child: Text(text),
-        ),
-      ),
-    );
-  }
-
-  Widget summaryCard(
-
-      String title,
-      String value,
-      Color color,
-      IconData icon,
-
-      ) {
-
-    return Expanded(
-
-      child:
-      Container(
-
-        padding:
-        const EdgeInsets.all(16),
-
-        decoration:
-        BoxDecoration(
-
-          color: Colors.white,
-
-          borderRadius:
-          BorderRadius.circular(20),
-
-          boxShadow: [
-
-            BoxShadow(
-
-              color:
-              Colors.grey
-                  .withOpacity(.1),
-
-              blurRadius: 8,
-
-            )
-
-          ],
-        ),
-
-        child:
-        Column(
-
-          children: [
-
-            Icon(
-              icon,
-              color: color,
-            ),
-
-            const SizedBox(height: 8),
-
-            Text(
-
-              title,
-
-              style:
-              const TextStyle(
-
-                fontWeight:
-                FontWeight.bold,
-
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            Text(
-
-              value,
-
-              style:
-              TextStyle(
-
-                fontSize: 20,
-
-                fontWeight:
-                FontWeight.bold,
-
-                color: color,
-
-              ),
-            ),
-
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildBar(
-
-      String name,
-      int value,
-
-      ) {
-
-    Color barColor =
-    Colors.green;
-
-    if (value < 80) {
-
-      barColor =
-      Colors.orange;
-
-    }
-
-    if (value < 60) {
-
-      barColor =
-      Colors.red;
-
-    }
-
-    return Padding(
-
-      padding:
-      const EdgeInsets.only(
-          bottom: 16),
-
-      child:
-      Column(
-
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
-
-        children: [
-
-          Text(
-
-            name,
-
-            style:
-            const TextStyle(
-
-              fontWeight:
-              FontWeight.bold,
-
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          Row(
-
-            children: [
-
-              Expanded(
-
-                child:
-                Container(
-
-                  height: 18,
-
-                  decoration:
-                  BoxDecoration(
+                    value:
+                    "$totalAdded",
 
                     color:
-                    Colors.grey
-                        .withOpacity(.15),
-
-                    borderRadius:
-                    BorderRadius.circular(
-                        20),
-
+                    Colors.green,
                   ),
 
-                  child:
-                  FractionallySizedBox(
+                  const SizedBox(
+                      width: 10),
 
-                    alignment:
-                    Alignment.centerLeft,
+                  SummaryCard(
 
-                    widthFactor:
-                    value / 100,
+                    icon:
+                    Icons.remove,
 
+                    title:
+                    "Used",
+
+                    value:
+                    "$totalUsed",
+
+                    color:
+                    Colors.red,
+                  ),
+
+                ],
+              ),
+
+              const SizedBox(
+                  height: 10),
+
+              Row(
+
+                children: [
+
+                  SummaryCard(
+
+                    icon:
+                    Icons.star,
+
+                    title:
+                    "Most Used",
+
+                    value:
+                    mostUsedItem,
+
+                    color:
+                    Colors.orange,
+                  ),
+
+                  const Expanded(
                     child:
-                    Container(
+                    SizedBox(),
+                  ),
 
-                      decoration:
-                      BoxDecoration(
+                ],
+              ),
 
-                        color:
-                        barColor,
+              const SizedBox(
+                  height: 24),
+
+              const Text(
+
+                "Usage Analytics",
+
+                style:
+                TextStyle(
+
+                  fontSize:
+                  20,
+
+                  fontWeight:
+                  FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(
+                  height: 20),
+
+              SizedBox(
+
+                height:
+                300,
+
+                child:
+                BarChart(
+
+                  BarChartData(
+
+                    borderData:
+                    FlBorderData(
+                      show:
+                      false,
+                    ),
+
+                    gridData:
+                    const FlGridData(
+                      show:
+                      false,
+                    ),
+
+                    titlesData:
+                    const FlTitlesData(),
+
+                    barGroups: [
+
+                      BarChartGroupData(
+
+                        x: 1,
+
+                        barRods: [
+
+                          BarChartRodData(
+
+                            toY:
+                            totalAdded
+                                .toDouble(),
+                          ),
+
+                        ],
+                      ),
+
+                      BarChartGroupData(
+
+                        x: 2,
+
+                        barRods: [
+
+                          BarChartRodData(
+
+                            toY:
+                            totalUsed
+                                .toDouble(),
+                          ),
+
+                        ],
+                      ),
+
+                      BarChartGroupData(
+
+                        x: 3,
+
+                        barRods: [
+
+                          BarChartRodData(
+
+                            toY:
+
+                            filteredTransactions
+                                .length
+
+                                .toDouble(),
+                          ),
+
+                        ],
+                      ),
+
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(
+                  height: 30),
+
+              const Text(
+
+                "Recent Transactions",
+
+                style:
+                TextStyle(
+
+                  fontSize:
+                  20,
+
+                  fontWeight:
+                  FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(
+                  height: 12),
+
+              ...filteredTransactions
+                  .reversed
+
+                  .map(
+
+                      (transaction){
+
+                    return Card(
+
+                      shape:
+                      RoundedRectangleBorder(
 
                         borderRadius:
                         BorderRadius.circular(
                             20),
-
                       ),
-                    ),
-                  ),
-                ),
-              ),
 
-              const SizedBox(width: 10),
+                      child:
+                      ListTile(
 
-              Text("$value"),
+                        leading:
+                        CircleAvatar(
+
+                          backgroundColor:
+
+                          transaction.type
+                              ==
+                              "In"
+
+                              ?
+
+                          Colors.green
+                              .withOpacity(
+                              .15)
+
+                              :
+
+                          Colors.red
+                              .withOpacity(
+                              .15),
+
+                          child:
+                          Icon(
+
+                            transaction.type
+                                ==
+                                "In"
+
+                                ?
+
+                            Icons.arrow_downward
+
+                                :
+
+                            Icons.arrow_upward,
+
+                            color:
+
+                            transaction.type
+                                ==
+                                "In"
+
+                                ?
+
+                            Colors.green
+
+                                :
+
+                            Colors.red,
+                          ),
+                        ),
+
+                        title:
+                        Text(
+
+                            transaction
+                                .itemName),
+
+                        subtitle:
+                        Text(
+
+                          transaction
+                              .date
+
+                              .toString()
+
+                              .substring(
+                              0,
+                              16),
+                        ),
+
+                        trailing:
+                        Text(
+
+                          "${transaction.type} ${transaction.quantity}",
+
+                          style:
+                          TextStyle(
+
+                            fontWeight:
+                            FontWeight.bold,
+
+                            color:
+
+                            transaction.type
+                                ==
+                                "In"
+
+                                ?
+
+                            Colors.green
+
+                                :
+
+                            Colors.red,
+                          ),
+                        ),
+                      ),
+                    );
+
+                  }),
+
+              const SizedBox(
+                  height: 80),
 
             ],
           ),
-
-        ],
-      ),
-    );
-  }
-
-  Widget exportButton(
-
-      String text,
-      IconData icon,
-
-      ) {
-
-    return ElevatedButton.icon(
-
-      onPressed: () {},
-
-      icon: Icon(icon),
-
-      label: Text(text),
-
-      style:
-      ElevatedButton
-          .styleFrom(
-
-        backgroundColor:
-        Colors.white,
-
-        foregroundColor:
-        const Color(
-            0xff2563EB),
-
-        shape:
-        RoundedRectangleBorder(
-
-          borderRadius:
-          BorderRadius.circular(18),
-
         ),
-
-        padding:
-        const EdgeInsets.symmetric(
-            vertical: 14),
-
       ),
     );
   }
