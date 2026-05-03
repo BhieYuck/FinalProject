@@ -1,70 +1,52 @@
 import 'package:flutter/material.dart';
 
 import '../data/app_data.dart';
-
 import '../widgets/app_header.dart';
 import '../widgets/gradient_button.dart';
 
-class StockScreen
-    extends StatefulWidget {
-
-  const StockScreen({
-    super.key,
-  });
+class StockScreen extends StatefulWidget {
+  const StockScreen({super.key});
 
   @override
-  State<StockScreen>
-  createState() =>
+  State<StockScreen> createState() =>
       _StockScreenState();
 }
 
 class _StockScreenState
-    extends State<
-        StockScreen> {
+    extends State<StockScreen> {
 
-  String filter =
-      "All";
+  String filter = "All";
 
   @override
-  Widget build(
-      BuildContext context) {
+  Widget build(BuildContext context) {
 
     final items =
-    transactions.where(
-            (tx){
+    transactions.where((tx) {
 
-          if(
-          filter=="All"){
-            return true;
-          }
+      if (filter == "All") {
+        return true;
+      }
 
-          return
-              tx["type"]
-                  ==
-                  filter;
+      return tx["type"] == filter;
 
-        }).toList();
+    }).toList();
 
     return Scaffold(
 
       backgroundColor:
-      const Color(
-          0xffF8FAFC),
+      const Color(0xffF8FAFC),
 
       appBar:
       const AppHeader(
-        title:
-        "Stock Movement",
+        title: "Stock Movement",
       ),
 
       body: Padding(
 
         padding:
-        const EdgeInsets.all(
-            16),
+        const EdgeInsets.all(16),
 
-        child:
-        Column(
+        child: Column(
 
           children: [
 
@@ -73,9 +55,7 @@ class _StockScreenState
               children: [
 
                 tab("All"),
-
                 tab("In"),
-
                 tab("Out"),
 
               ],
@@ -93,20 +73,12 @@ class _StockScreenState
                 items.length,
 
                 itemBuilder:
-                    (_, i){
+                    (_, i) {
 
                   final tx =
                   items[i];
 
                   return Card(
-
-                    shape:
-                    RoundedRectangleBorder(
-
-                      borderRadius:
-                      BorderRadius.circular(
-                          20),
-                    ),
 
                     child:
                     ListTile(
@@ -114,7 +86,7 @@ class _StockScreenState
                       leading:
                       Icon(
 
-                        tx["type"]=="In"
+                        tx["type"] == "In"
 
                             ? Icons.arrow_downward
 
@@ -122,7 +94,7 @@ class _StockScreenState
 
                         color:
 
-                        tx["type"]=="In"
+                        tx["type"] == "In"
 
                             ? Colors.green
 
@@ -130,17 +102,15 @@ class _StockScreenState
                       ),
 
                       title:
-                      Text(
-                          tx["name"]),
+                      Text(tx["name"]),
 
                       subtitle:
-                      Text(
-                          tx["date"]),
+                      Text(tx["date"]),
 
                       trailing:
                       Text(
 
-                        tx["type"]=="In"
+                        tx["type"] == "In"
 
                             ? "+${tx["qty"]}"
 
@@ -151,7 +121,7 @@ class _StockScreenState
 
                           color:
 
-                          tx["type"]=="In"
+                          tx["type"] == "In"
 
                               ? Colors.green
 
@@ -163,7 +133,6 @@ class _StockScreenState
                       ),
                     ),
                   );
-
                 },
               ),
             ),
@@ -183,25 +152,22 @@ class _StockScreenState
     );
   }
 
-  Widget tab(
-      String text){
+  Widget tab(String text) {
 
     final selected =
-        filter
-            ==
-            text;
+        filter == text;
 
     return Expanded(
 
       child:
       ElevatedButton(
 
-        onPressed:
-            (){
+        onPressed: () {
 
           setState(() {
-            filter =
-                text;
+
+            filter = text;
+
           });
 
         },
@@ -226,25 +192,208 @@ class _StockScreenState
     );
   }
 
-  void addTransaction(){
+  void addTransaction() {
 
-    setState(() {
+    Map<String, dynamic>
+    selectedItem =
+    inventory.first;
 
-      transactions.add({
+    String type = "In";
 
-        "name":
-        "Rice",
+    final qty =
+    TextEditingController();
 
-        "type":
-        "In",
+    showDialog(
 
-        "qty":
-        10,
+      context: context,
 
-        "date":
-        "Now",
-      });
+      builder: (_) {
 
-    });
+        return StatefulBuilder(
+
+          builder:
+              (_, setDialog) {
+
+            return AlertDialog(
+
+              title:
+              const Text(
+                  "Add Transaction"),
+
+              content:
+              Column(
+
+                mainAxisSize:
+                MainAxisSize.min,
+
+                children: [
+
+                  DropdownButton<
+                      Map<String, dynamic>>(
+
+                    isExpanded: true,
+
+                    value:
+                    selectedItem,
+
+                    items:
+                    inventory.map(
+                            (item) {
+
+                          return DropdownMenuItem(
+
+                            value:
+                            item,
+
+                            child:
+                            Text(
+                                item["name"]),
+                          );
+
+                        }).toList(),
+
+                    onChanged:
+                        (value) {
+
+                      setDialog(() {
+
+                        selectedItem =
+                        value!;
+
+                      });
+
+                    },
+                  ),
+
+                  const SizedBox(
+                      height: 12),
+
+                  DropdownButton<
+                      String>(
+
+                    isExpanded:
+                    true,
+
+                    value:
+                    type,
+
+                    items:
+                    const [
+
+                      DropdownMenuItem(
+
+                        value:
+                        "In",
+
+                        child:
+                        Text("In"),
+                      ),
+
+                      DropdownMenuItem(
+
+                        value:
+                        "Out",
+
+                        child:
+                        Text("Out"),
+                      ),
+
+                    ],
+
+                    onChanged:
+                        (value) {
+
+                      setDialog(() {
+
+                        type =
+                        value!;
+
+                      });
+
+                    },
+                  ),
+
+                  const SizedBox(
+                      height: 12),
+
+                  TextField(
+
+                    controller:
+                    qty,
+
+                    keyboardType:
+                    TextInputType.number,
+
+                    decoration:
+                    const InputDecoration(
+
+                      labelText:
+                      "Quantity",
+                    ),
+                  ),
+
+                ],
+              ),
+
+              actions: [
+
+                ElevatedButton(
+
+                  onPressed: () {
+
+                    final amount =
+                    int.parse(
+                        qty.text);
+
+                    setState(() {
+
+                      transactions.add({
+
+                        "name":
+                        selectedItem[
+                        "name"],
+
+                        "type":
+                        type,
+
+                        "qty":
+                        amount,
+
+                        "date":
+                        "Now",
+                      });
+
+                      if (type == "In") {
+
+                        selectedItem[
+                        "quantity"] += amount;
+
+                      }
+
+                      else {
+
+                        selectedItem[
+                        "quantity"] -= amount;
+
+                      }
+
+                    });
+
+                    Navigator.pop(
+                        context);
+
+                  },
+
+                  child:
+                  const Text(
+                      "Save"),
+                ),
+
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 }

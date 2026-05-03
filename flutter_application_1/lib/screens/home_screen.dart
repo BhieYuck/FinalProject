@@ -6,20 +6,23 @@ import '../widgets/app_header.dart';
 import '../widgets/search_box.dart';
 import '../widgets/summary_card.dart';
 
-class HomeScreen
-    extends StatelessWidget {
-
-  const HomeScreen({
-    super.key,
-  });
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  Widget build(
-      BuildContext context) {
+  State<HomeScreen> createState() =>
+      _HomeScreenState();
+}
+
+class _HomeScreenState
+    extends State<HomeScreen> {
+
+  @override
+  Widget build(BuildContext context) {
 
     final low =
     inventory.where(
-            (e)=>
+            (e) =>
         e["quantity"]
             <=
             e["threshold"])
@@ -27,42 +30,37 @@ class HomeScreen
 
     final out =
     inventory.where(
-            (e)=>
-        e["quantity"]
-            ==0)
+            (e) =>
+        e["quantity"] == 0)
         .length;
 
     return Scaffold(
 
       backgroundColor:
-      const Color(
-          0xffF8FAFC),
+      const Color(0xffF8FAFC),
 
       appBar:
       const AppHeader(
-        title:
-        "StockTrack",
+        title: "StockTrack",
       ),
 
       floatingActionButton:
       FloatingActionButton(
 
         backgroundColor:
-        const Color(
-            0xff2563EB),
+        const Color(0xff2563EB),
+
+        onPressed:
+        addItemModal,
 
         child:
-        const Icon(
-            Icons.add),
-
-        onPressed: () {},
+        const Icon(Icons.add),
       ),
 
       body: Padding(
 
         padding:
-        const EdgeInsets.all(
-            16),
+        const EdgeInsets.all(16),
 
         child:
         ListView(
@@ -73,13 +71,13 @@ class HomeScreen
 
               "Good Day, Admin! 👋",
 
-              style:
-              TextStyle(
+              style: TextStyle(
 
                 fontSize: 22,
 
                 fontWeight:
                 FontWeight.bold,
+
               ),
             ),
 
@@ -87,8 +85,7 @@ class HomeScreen
                 height: 16),
 
             SearchBox(
-              onChanged:
-                  (_) {},
+              onChanged: (_) {},
             ),
 
             const SizedBox(
@@ -100,8 +97,7 @@ class HomeScreen
 
                 SummaryCard(
 
-                  title:
-                  "Total",
+                  title: "Total",
 
                   value:
                   "${inventory.length}",
@@ -115,8 +111,7 @@ class HomeScreen
 
                 SummaryCard(
 
-                  title:
-                  "Low",
+                  title: "Low",
 
                   value:
                   "${low.length}",
@@ -130,11 +125,9 @@ class HomeScreen
 
                 SummaryCard(
 
-                  title:
-                  "Out",
+                  title: "Out",
 
-                  value:
-                  "$out",
+                  value: "$out",
 
                   icon:
                   Icons.close,
@@ -153,44 +146,48 @@ class HomeScreen
 
               "Low Stock Items",
 
-              style:
-              TextStyle(
+              style: TextStyle(
 
                 fontWeight:
                 FontWeight.bold,
 
                 fontSize: 18,
+
               ),
             ),
 
-            ...low.map(
+            ...low.map((item) {
 
-                    (item){
+              return Card(
 
-                  return Card(
+                child:
+                ListTile(
 
-                    child:
-                    ListTile(
+                  leading:
+                  const Icon(
 
-                      leading:
-                      const Icon(
-                          Icons.warning,
-                          color:
-                          Colors.orange),
+                    Icons.warning,
 
-                      title:
-                      Text(
-                          item[
-                          "name"]),
+                    color:
+                    Colors.orange,
 
-                      trailing:
-                      Text(
+                  ),
 
-                          "${item["quantity"]} left"),
-                    ),
-                  );
+                  title:
+                  Text(
+                      item["name"]),
 
-                }),
+                  subtitle:
+                  Text(
+                      item["category"]),
+
+                  trailing:
+                  Text(
+                      "${item["quantity"]} left"),
+                ),
+              );
+
+            }),
 
             const SizedBox(
                 height: 20),
@@ -199,58 +196,220 @@ class HomeScreen
 
               "Recent Activity",
 
-              style:
-              TextStyle(
+              style: TextStyle(
 
                 fontWeight:
                 FontWeight.bold,
 
                 fontSize: 18,
+
               ),
             ),
 
-            ...transactions.map(
+            ...transactions.map((tx) {
 
-                    (tx){
+              return Card(
 
-                  return Card(
+                child:
+                ListTile(
 
-                    child:
-                    ListTile(
+                  leading:
+                  Icon(
 
-                      leading:
-                      Icon(
+                    tx["type"] == "In"
 
-                        tx["type"]=="In"
+                        ? Icons.add_circle
 
-                            ? Icons.add_circle
+                        : Icons.remove_circle,
 
-                            : Icons.remove_circle,
+                    color:
 
-                        color:
+                    tx["type"] == "In"
 
-                        tx["type"]=="In"
+                        ? Colors.green
 
-                            ? Colors.green
+                        : Colors.red,
 
-                            : Colors.red,
-                      ),
+                  ),
 
-                      title:
-                      Text(
-                          tx["name"]),
+                  title:
+                  Text(
+                      tx["name"]),
 
-                      subtitle:
-                      Text(
-                          tx["date"]),
-                    ),
-                  );
+                  subtitle:
+                  Text(
+                      tx["date"]),
+                ),
+              );
 
-                }),
+            }),
 
           ],
         ),
       ),
+    );
+  }
+
+  void addItemModal() {
+
+    final name =
+    TextEditingController();
+
+    final qty =
+    TextEditingController();
+
+    String category =
+        "Foods";
+
+    showDialog(
+
+      context: context,
+
+      builder: (_) {
+
+        return StatefulBuilder(
+
+          builder:
+              (_, setDialog) {
+
+            return AlertDialog(
+
+              title:
+              const Text(
+                  "Add Item"),
+
+              content:
+              Column(
+
+                mainAxisSize:
+                MainAxisSize.min,
+
+                children: [
+
+                  TextField(
+
+                    controller:
+                    name,
+
+                    decoration:
+                    const InputDecoration(
+
+                      labelText:
+                      "Name",
+
+                    ),
+                  ),
+
+                  TextField(
+
+                    controller:
+                    qty,
+
+                    keyboardType:
+                    TextInputType.number,
+
+                    decoration:
+                    const InputDecoration(
+
+                      labelText:
+                      "Quantity",
+
+                    ),
+                  ),
+
+                  const SizedBox(
+                      height: 12),
+
+                  DropdownButton<String>(
+
+                    value:
+                    category,
+
+                    isExpanded:
+                    true,
+
+                    items: const [
+
+                      DropdownMenuItem(
+
+                        value:
+                        "Foods",
+
+                        child:
+                        Text(
+                            "Foods"),
+                      ),
+
+                      DropdownMenuItem(
+
+                        value:
+                        "Supplies",
+
+                        child:
+                        Text(
+                            "Supplies"),
+                      ),
+
+                    ],
+
+                    onChanged:
+                        (value) {
+
+                      setDialog(() {
+
+                        category =
+                            value!;
+
+                      });
+
+                    },
+                  ),
+
+                ],
+              ),
+
+              actions: [
+
+                ElevatedButton(
+
+                  onPressed: () {
+
+                    setState(() {
+
+                      inventory.add({
+
+                        "name":
+                        name.text,
+
+                        "category":
+                        category,
+
+                        "quantity":
+                        int.parse(
+                            qty.text),
+
+                        "threshold":
+                        5,
+
+                      });
+
+                    });
+
+                    Navigator.pop(
+                        context);
+
+                  },
+
+                  child:
+                  const Text(
+                      "Save"),
+                ),
+
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
