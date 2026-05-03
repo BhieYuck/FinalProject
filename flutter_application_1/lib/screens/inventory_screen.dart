@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../data/app_data.dart';
 
+import '../models/item_model.dart';
+
 import '../widgets/app_header.dart';
 import '../widgets/search_box.dart';
-import '../widgets/gradient_button.dart';
+import '../widgets/mobile_frame.dart';
+import '../widgets/category_tab.dart';
 
 class InventoryScreen
     extends StatefulWidget {
@@ -20,97 +23,354 @@ class InventoryScreen
 }
 
 class _InventoryScreenState
-    extends State<
-        InventoryScreen> {
+    extends State<InventoryScreen> {
 
   String search = "";
 
-  String category =
+  String selectedTab =
       "All";
 
-  @override
-  Widget build(
-      BuildContext context) {
+  final TextEditingController
+  nameController =
+  TextEditingController();
 
-    final items =
-    inventory.where(
+  final TextEditingController
+  quantityController =
+  TextEditingController();
+
+  String category =
+      "Foods";
+
+  List<ItemModel>
+  get filteredItems {
+
+    return inventory.where(
             (item){
 
-          final nameMatch =
-          item["name"]
+          final searchMatch =
+
+          item.name
               .toLowerCase()
+
               .contains(
+
               search
                   .toLowerCase());
 
           final categoryMatch =
 
-          category=="All"
+          selectedTab
+              == "All"
 
               ||
 
-              item["category"]
+              item.category
                   ==
-                  category;
+                  selectedTab;
 
           return
-              nameMatch
-                  &&
-                  categoryMatch;
+
+              searchMatch
+              &&
+              categoryMatch;
 
         }).toList();
+  }
 
-    return Scaffold(
+  @override
+  Widget build(
+      BuildContext context) {
 
-      backgroundColor:
-      const Color(
-          0xffF8FAFC),
+    return MobileFrame(
 
-      appBar:
-      const AppHeader(
-        title:
-        "Inventory",
+      child:
+      Scaffold(
+
+        backgroundColor:
+        const Color(
+            0xffF5F7FB),
+
+        appBar:
+        const AppHeader(
+          title:
+          "Inventory",
+        ),
+
+        floatingActionButton:
+        FloatingActionButton(
+
+          backgroundColor:
+          const Color(
+              0xff2563EB),
+
+          onPressed:
+          showAddDialog,
+
+          child:
+          const Icon(
+              Icons.add),
+        ),
+
+        body:
+        Padding(
+
+          padding:
+          const EdgeInsets.all(
+              16),
+
+          child:
+          Column(
+
+            children: [
+
+              SearchBox(
+
+                onChanged:
+                    (value){
+
+                  setState(() {
+
+                    search =
+                        value;
+
+                  });
+
+                },
+              ),
+
+              const SizedBox(
+                  height: 16),
+
+              Row(
+
+                mainAxisAlignment:
+                MainAxisAlignment
+                    .spaceBetween,
+
+                children: [
+
+                  CategoryTab(
+
+                    text:
+                    "All",
+
+                    active:
+
+                    selectedTab
+                        ==
+                        "All",
+
+                    onTap:(){
+
+                      setState(() {
+
+                        selectedTab =
+                        "All";
+
+                      });
+
+                    },
+                  ),
+
+                  CategoryTab(
+
+                    text:
+                    "Foods",
+
+                    active:
+
+                    selectedTab
+                        ==
+                        "Foods",
+
+                    onTap:(){
+
+                      setState(() {
+
+                        selectedTab =
+                        "Foods";
+
+                      });
+
+                    },
+                  ),
+
+                  CategoryTab(
+
+                    text:
+                    "Supplies",
+
+                    active:
+
+                    selectedTab
+                        ==
+                        "Supplies",
+
+                    onTap:(){
+
+                      setState(() {
+
+                        selectedTab =
+                        "Supplies";
+
+                      });
+
+                    },
+                  ),
+
+                ],
+              ),
+
+              const SizedBox(
+                  height: 20),
+
+              Expanded(
+
+                child:
+                ListView(
+
+                  children:
+
+                  filteredItems.map(
+
+                          (item){
+
+                        return buildItemCard(
+                            item);
+
+                      }).toList(),
+                ),
+              ),
+
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildItemCard(
+      ItemModel item){
+
+    return Card(
+
+      shape:
+      RoundedRectangleBorder(
+
+        borderRadius:
+        BorderRadius.circular(
+            20),
       ),
 
-      body: Padding(
+      child:
+      Padding(
 
         padding:
         const EdgeInsets.all(
-            16),
+            12),
 
         child:
         Column(
 
           children: [
 
-            SearchBox(
-
-              onChanged:
-                  (value){
-
-                setState(() {
-                  search =
-                      value;
-                });
-
-              },
-            ),
-
-            const SizedBox(
-                height: 16),
-
             Row(
 
               children: [
 
-                tab(
-                    "All"),
+                CircleAvatar(
 
-                tab(
-                    "Foods"),
+                  backgroundColor:
 
-                tab(
-                    "Supplies"),
+                  item.isOut
+
+                      ?
+
+                  Colors.red
+                      .withOpacity(
+                      .15)
+
+                      :
+
+                  item.isLow
+
+                          ?
+
+                  Colors.orange
+                      .withOpacity(
+                      .15)
+
+                          :
+
+                  Colors.green
+                      .withOpacity(
+                      .15),
+
+                  child:
+                  Icon(
+
+                    Icons.inventory,
+
+                    color:
+
+                    item.isOut
+
+                        ?
+
+                    Colors.red
+
+                        :
+
+                    item.isLow
+
+                            ?
+
+                    Colors.orange
+
+                            :
+
+                    Colors.green,
+                  ),
+                ),
+
+                const SizedBox(
+                    width: 12),
+
+                Expanded(
+
+                  child:
+                  Column(
+
+                    crossAxisAlignment:
+                    CrossAxisAlignment
+                        .start,
+
+                    children: [
+
+                      Text(
+
+                        item.name,
+
+                        style:
+                        const TextStyle(
+
+                          fontSize:
+                          18,
+
+                          fontWeight:
+                          FontWeight.bold,
+                        ),
+                      ),
+
+                      Text(
+                          item.category),
+
+                    ],
+                  ),
+                ),
+
+                buildStatusBadge(
+                    item),
 
               ],
             ),
@@ -118,147 +378,87 @@ class _InventoryScreenState
             const SizedBox(
                 height: 16),
 
-            Expanded(
+            Row(
 
-              child:
-              ListView.builder(
+              mainAxisAlignment:
+              MainAxisAlignment
+                  .spaceBetween,
 
-                itemCount:
-                items.length,
+              children: [
 
-                itemBuilder:
-                    (_, i){
+                IconButton(
 
-                  final item =
-                  items[i];
+                  onPressed:(){
 
-                  final qty =
-                  item[
-                  "quantity"];
+                    minusQty(
+                        item);
 
-                  final threshold =
-                  item[
-                  "threshold"];
+                  },
 
-                  String status =
-                      "In Stock";
+                  icon:
+                  const Icon(
 
-                  Color color =
-                  Colors.green;
+                    Icons.remove_circle,
 
-                  if(
-                  qty==0){
+                    color:
+                    Colors.red,
+                  ),
+                ),
 
-                    status =
-                    "Out";
+                Text(
 
-                    color =
-                    Colors.red;
+                  "${item.quantity}",
 
-                  }
+                  style:
+                  const TextStyle(
 
-                  else if(
-                  qty<=threshold){
+                    fontSize:
+                    22,
 
-                    status =
-                    "Low";
+                    fontWeight:
+                    FontWeight.bold,
+                  ),
+                ),
 
-                    color =
-                    Colors.orange;
+                IconButton(
 
-                  }
+                  onPressed:(){
 
-                  return Card(
+                    plusQty(
+                        item);
 
-                    elevation: 1,
+                  },
 
-                    shape:
-                    RoundedRectangleBorder(
+                  icon:
+                  const Icon(
 
-                      borderRadius:
-                      BorderRadius.circular(
-                          20),
-                    ),
+                    Icons.add_circle,
 
-                    child:
-                    ListTile(
+                    color:
+                    Colors.green,
+                  ),
+                ),
 
-                      contentPadding:
-                      const EdgeInsets.all(
-                          12),
+                IconButton(
 
-                      title:
-                      Text(
+                  onPressed:(){
 
-                        item["name"],
+                    deleteItem(
+                        item);
 
-                        style:
-                        const TextStyle(
+                  },
 
-                          fontWeight:
-                          FontWeight.bold,
+                  icon:
+                  const Icon(
 
-                          fontSize: 18,
-                        ),
-                      ),
+                    Icons.delete,
 
-                      subtitle:
-                      Text(
+                    color:
+                    Colors.grey,
+                  ),
+                ),
 
-                          "${item["category"]}\n${item["quantity"]} pcs"),
-
-                      trailing:
-                      Container(
-
-                        padding:
-                        const EdgeInsets.symmetric(
-
-                          horizontal: 10,
-
-                          vertical: 6,
-                        ),
-
-                        decoration:
-                        BoxDecoration(
-
-                          color:
-                          color.withOpacity(
-                              .1),
-
-                          borderRadius:
-                          BorderRadius.circular(
-                              20),
-                        ),
-
-                        child:
-                        Text(
-
-                          status,
-
-                          style:
-                          TextStyle(
-                            color:
-                            color,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-
-                },
-              ),
-            ),
-
-            const SizedBox(
-                height: 12),
-
-            GradientButton(
-
-              text:
-              "+ Add Item",
-
-              onTap:
-              addItemModal,
+              ],
             ),
 
           ],
@@ -267,86 +467,137 @@ class _InventoryScreenState
     );
   }
 
-  Widget tab(
-      String text){
+  Widget buildStatusBadge(
+      ItemModel item){
 
-    final selected =
-        category
-            ==
-            text;
+    Color color;
 
-    return Expanded(
+    String text;
 
-      child: Padding(
+    if(item.isOut){
 
-        padding:
-        const EdgeInsets.symmetric(
-            horizontal: 4),
+      color =
+      Colors.red;
 
-        child:
-        ElevatedButton(
+      text =
+      "Out";
+    }
 
-          style:
-          ElevatedButton
-              .styleFrom(
+    else if(item.isLow){
 
-            backgroundColor:
+      color =
+      Colors.orange;
 
-            selected
+      text =
+      "Low";
+    }
 
-                ? const Color(
-                0xff2563EB)
+    else{
 
-                : Colors.white,
+      color =
+      Colors.green;
 
-            foregroundColor:
+      text =
+      "In";
+    }
 
-            selected
+    return Container(
 
-                ? Colors.white
+      padding:
+      const EdgeInsets.symmetric(
 
-                : Colors.black,
+        horizontal: 12,
+        vertical: 6,
+      ),
 
-            shape:
-            RoundedRectangleBorder(
+      decoration:
+      BoxDecoration(
 
-              borderRadius:
-              BorderRadius.circular(
-                  18),
-            ),
-          ),
+        color:
+        color
+            .withOpacity(
+            .12),
 
-          onPressed:
-              (){
+        borderRadius:
+        BorderRadius.circular(
+            20),
+      ),
 
-            setState(() {
-              category =
-                  text;
-            });
+      child:
+      Text(
 
-          },
+        text,
 
-          child:
-          Text(text),
+        style:
+        TextStyle(
+          color:
+          color,
         ),
       ),
     );
   }
 
-  void addItemModal(){
+  void plusQty(
+      ItemModel item){
 
-    final name =
-    TextEditingController();
+    setState(() {
 
-    final qty =
-    TextEditingController();
+      item.quantity++;
 
-    String selected =
+      activities.add(
+          "Added 1 ${item.name}");
+
+    });
+  }
+
+  void minusQty(
+      ItemModel item){
+
+    if(
+    item.quantity <= 0){
+
+      return;
+    }
+
+    setState(() {
+
+      item.quantity--;
+
+      activities.add(
+          "Removed 1 ${item.name}");
+
+    });
+  }
+
+  void deleteItem(
+      ItemModel item){
+
+    setState(() {
+
+      inventory.remove(
+          item);
+
+      activities.add(
+
+          "Deleted ${item.name}");
+
+    });
+  }
+
+  void showAddDialog(){
+
+    nameController.clear();
+
+    quantityController
+        .clear();
+
+    category =
         "Foods";
 
     showDialog(
 
-      context: context,
+      context:
+      context,
 
       builder:
           (_) {
@@ -376,26 +627,81 @@ class _InventoryScreenState
               TextField(
 
                 controller:
-                name,
+                nameController,
 
                 decoration:
                 const InputDecoration(
-                    labelText:
-                    "Name"),
+
+                  labelText:
+                  "Name",
+                ),
               ),
+
+              const SizedBox(
+                  height: 12),
 
               TextField(
 
                 controller:
-                qty,
+                quantityController,
 
                 keyboardType:
                 TextInputType.number,
 
                 decoration:
                 const InputDecoration(
-                    labelText:
-                    "Quantity"),
+
+                  labelText:
+                  "Quantity",
+                ),
+              ),
+
+              const SizedBox(
+                  height: 12),
+
+              DropdownButton<String>(
+
+                value:
+                category,
+
+                isExpanded:
+                true,
+
+                items:
+
+                [
+
+                  "Foods",
+
+                  "Supplies",
+
+                ].map(
+
+                        (e){
+
+                      return DropdownMenuItem(
+
+                        value:
+                        e,
+
+                        child:
+                        Text(e),
+                      );
+
+                    }).toList(),
+
+                onChanged:
+                    (value){
+
+                  setState(() {
+
+                    category =
+                    value
+                    as String;
+
+                  });
+
+                },
               ),
 
             ],
@@ -406,41 +712,82 @@ class _InventoryScreenState
             ElevatedButton(
 
               onPressed:
-                  (){
-
-                setState(() {
-
-                  inventory.add({
-
-                    "name":
-                    name.text,
-
-                    "category":
-                    selected,
-
-                    "quantity":
-                    int.parse(
-                        qty.text),
-
-                    "threshold":
-                    5,
-                  });
-
-                });
-
-                Navigator.pop(
-                    context);
-
-              },
+              saveItem,
 
               child:
               const Text(
                   "Save"),
-            )
+            ),
 
           ],
         );
       },
     );
+  }
+
+  void saveItem(){
+
+    if(
+    nameController
+        .text
+        .isEmpty){
+
+      return;
+    }
+
+    if(
+    quantityController
+        .text
+        .isEmpty){
+
+      return;
+    }
+
+    final item =
+    ItemModel(
+
+      name:
+
+      nameController
+          .text,
+
+      category:
+      category,
+
+      quantity:
+
+      int.parse(
+
+          quantityController
+              .text),
+
+      threshold:
+      5,
+    );
+
+    setState(() {
+
+      inventory.add(
+          item);
+
+      activities.add(
+
+          "Added ${item.name}");
+
+    });
+
+    Navigator.pop(
+        context);
+  }
+
+  @override
+  void dispose(){
+
+    nameController.dispose();
+
+    quantityController
+        .dispose();
+
+    super.dispose();
   }
 }

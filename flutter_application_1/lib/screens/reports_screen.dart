@@ -1,121 +1,67 @@
 import 'package:flutter/material.dart';
 
-import 'package:fl_chart/fl_chart.dart';
-
 import '../data/app_data.dart';
-
+import '../models/item_model.dart';
 import '../models/transaction_model.dart';
 
-import '../widgets/app_header.dart';
 import '../widgets/mobile_frame.dart';
+import '../widgets/app_header.dart';
 import '../widgets/category_tab.dart';
 import '../widgets/summary_card.dart';
 
-class ReportsScreen
-    extends StatefulWidget {
-
-  const ReportsScreen({
-    super.key,
-  });
+class ReportsScreen extends StatefulWidget {
+  const ReportsScreen({super.key});
 
   @override
-  State<ReportsScreen>
-  createState() =>
-      _ReportsScreenState();
+  State<ReportsScreen> createState() => _ReportsScreenState();
 }
 
-class _ReportsScreenState
-    extends State<ReportsScreen> {
+class _ReportsScreenState extends State<ReportsScreen> {
+  String selectedFilter = "Today";
 
-  String selectedFilter =
-      "Today";
+  List<ItemModel> get inventory => AppData.inventory;
+  List<TransactionModel> get transactions => AppData.transactions;
 
-  List<TransactionModel>
-  get filteredTransactions {
-
-    final now =
-    DateTime.now();
-
-    return transactions.where(
-            (transaction){
-
-          final difference =
-
-          now.difference(
-              transaction.date)
-
-              .inDays;
-
-          if(
-          selectedFilter
-              ==
-              "Today"){
-
-            return
-                difference
-                <=
-                0;
-          }
-
-          if(
-          selectedFilter
-              ==
-              "Weekly"){
-
-            return
-                difference
-                <=
-                7;
-          }
-
-          return
-              difference
-              <=
-              30;
-
-        }).toList();
-  }
-
-  int get totalAdded {
-
+  int get totalItems {
     int total = 0;
 
-    for(
-    final transaction
-    in
-    filteredTransactions){
+    for (var item in inventory) {
+      total += item.quantity;
+    }
 
-      if(
-      transaction.type
-          ==
-          "In"){
+    return total;
+  }
 
-        total +=
-            transaction
-                .quantity;
+  int get lowStockCount {
+    int count = 0;
+
+    for (var item in inventory) {
+      if (item.quantity <= item.threshold) {
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  int get stockInTotal {
+    int total = 0;
+
+    for (var t in transactions) {
+      if (t.type == "IN") {
+        total += t.quantity;
       }
     }
 
     return total;
   }
 
-  int get totalUsed {
-
+  int get stockOutTotal {
     int total = 0;
 
-    for(
-    final transaction
-    in
-    filteredTransactions){
-
-      if(
-      transaction.type
-          ==
-          "Out"){
-
-        total +=
-            transaction
-                .quantity;
+    for (var t in transactions) {
+      if (t.type == "OUT") {
+        total += t.quantity;
       }
     }
 
@@ -123,514 +69,395 @@ class _ReportsScreenState
   }
 
   String get mostUsedItem {
+    Map<String, int> usage = {};
 
-    Map<String,int>
-    usage = {};
-
-    for(
-    final transaction
-    in
-    filteredTransactions){
-
-      if(
-      transaction.type
-          ==
-          "Out"){
-
-        usage.update(
-
-          transaction.itemName,
-
-              (value){
-
-            return
-                value
-                +
-                transaction.quantity;
-
-          },
-
-          ifAbsent:(){
-
-            return
-                transaction.quantity;
-
-          },
-        );
+    for (var t in transactions) {
+      if (t.type == "OUT") {
+        usage[t.itemName] =
+            (usage[t.itemName] ?? 0) + t.quantity;
       }
     }
 
-    if(
-    usage.isEmpty){
+    if (usage.isEmpty) return "-";
 
-      return
-          "-";
-    }
+    String winner = usage.keys.first;
+    int highest = usage[winner]!;
 
-    String best =
-        usage.keys.first;
+    usage.forEach((key, value) {
+      if (value > highest) {
+        winner = key;
+        highest = value;
+      }
+    });
 
-    int max =
-    usage.values.first;
-
-    usage.forEach(
-            (key,value){
-
-          if(
-          value
-              >
-              max){
-
-            max =
-                value;
-
-            best =
-                key;
-          }
-
-        });
-
-    return best;
+    return winner;
   }
 
   @override
-  Widget build(
-      BuildContext context) {
-
+  Widget build(BuildContext context) {
     return MobileFrame(
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade50,
 
-      child:
-      Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
 
-        backgroundColor:
-        const Color(
-            0xffF5F7FB),
+            child: Column(
+              children: [
 
-        appBar:
-        const AppHeader(
-          title:
-          "Reports",
-        ),
-
-        body:
-        Padding(
-
-          padding:
-          const EdgeInsets.all(
-              16),
-
-          child:
-          ListView(
-
-            children: [
-
-              Row(
-
-                mainAxisAlignment:
-                MainAxisAlignment
-                    .spaceBetween,
-
-                children: [
-
-                  CategoryTab(
-
-                    text:
-                    "Today",
-
-                    active:
-
-                    selectedFilter
-                        ==
-                        "Today",
-
-                    onTap:(){
-
-                      setState(() {
-
-                        selectedFilter =
-                        "Today";
-
-                      });
-
-                    },
-                  ),
-
-                  CategoryTab(
-
-                    text:
-                    "Weekly",
-
-                    active:
-
-                    selectedFilter
-                        ==
-                        "Weekly",
-
-                    onTap:(){
-
-                      setState(() {
-
-                        selectedFilter =
-                        "Weekly";
-
-                      });
-
-                    },
-                  ),
-
-                  CategoryTab(
-
-                    text:
-                    "Monthly",
-
-                    active:
-
-                    selectedFilter
-                        ==
-                        "Monthly",
-
-                    onTap:(){
-
-                      setState(() {
-
-                        selectedFilter =
-                        "Monthly";
-
-                      });
-
-                    },
-                  ),
-
-                ],
-              ),
-
-              const SizedBox(
-                  height: 20),
-
-              Row(
-
-                children: [
-
-                  SummaryCard(
-
-                    icon:
-                    Icons.add,
-
-                    title:
-                    "Added",
-
-                    value:
-                    "$totalAdded",
-
-                    color:
-                    Colors.green,
-                  ),
-
-                  const SizedBox(
-                      width: 10),
-
-                  SummaryCard(
-
-                    icon:
-                    Icons.remove,
-
-                    title:
-                    "Used",
-
-                    value:
-                    "$totalUsed",
-
-                    color:
-                    Colors.red,
-                  ),
-
-                ],
-              ),
-
-              const SizedBox(
-                  height: 10),
-
-              Row(
-
-                children: [
-
-                  SummaryCard(
-
-                    icon:
-                    Icons.star,
-
-                    title:
-                    "Most Used",
-
-                    value:
-                    mostUsedItem,
-
-                    color:
-                    Colors.orange,
-                  ),
-
-                  const Expanded(
-                    child:
-                    SizedBox(),
-                  ),
-
-                ],
-              ),
-
-              const SizedBox(
-                  height: 24),
-
-              const Text(
-
-                "Usage Analytics",
-
-                style:
-                TextStyle(
-
-                  fontSize:
-                  20,
-
-                  fontWeight:
-                  FontWeight.bold,
+                const AppHeader(
+                  title: "Reports",
                 ),
-              ),
 
-              const SizedBox(
-                  height: 20),
+                const SizedBox(height: 16),
 
-              SizedBox(
+                Row(
+                  children: [
 
-                height:
-                300,
-
-                child:
-                BarChart(
-
-                  BarChartData(
-
-                    borderData:
-                    FlBorderData(
-                      show:
-                      false,
+                    Expanded(
+                      child: CategoryTab(
+                        title: "Today",
+                        selected:
+                            selectedFilter == "Today",
+                        onTap: () {
+                          setState(() {
+                            selectedFilter = "Today";
+                          });
+                        },
+                      ),
                     ),
 
-                    gridData:
-                    const FlGridData(
-                      show:
-                      false,
+                    const SizedBox(width: 8),
+
+                    Expanded(
+                      child: CategoryTab(
+                        title: "Weekly",
+                        selected:
+                            selectedFilter == "Weekly",
+                        onTap: () {
+                          setState(() {
+                            selectedFilter = "Weekly";
+                          });
+                        },
+                      ),
                     ),
 
-                    titlesData:
-                    const FlTitlesData(),
+                    const SizedBox(width: 8),
 
-                    barGroups: [
+                    Expanded(
+                      child: CategoryTab(
+                        title: "Monthly",
+                        selected:
+                            selectedFilter == "Monthly",
+                        onTap: () {
+                          setState(() {
+                            selectedFilter = "Monthly";
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
 
-                      BarChartGroupData(
+                const SizedBox(height: 20),
 
-                        x: 1,
+                Expanded(
+                  child: ListView(
+                    children: [
 
-                        barRods: [
+                      Row(
+                        children: [
 
-                          BarChartRodData(
-
-                            toY:
-                            totalAdded
-                                .toDouble(),
+                          Expanded(
+                            child: SummaryCard(
+                              title: "Total Items",
+                              value:
+                                  totalItems.toString(),
+                              icon: Icons.inventory,
+                            ),
                           ),
 
+                          const SizedBox(width: 12),
+
+                          Expanded(
+                            child: SummaryCard(
+                              title: "Low Stock",
+                              value:
+                                  lowStockCount
+                                      .toString(),
+                              icon:
+                                  Icons.warning,
+                            ),
+                          ),
                         ],
                       ),
 
-                      BarChartGroupData(
+                      const SizedBox(height: 12),
 
-                        x: 2,
+                      Row(
+                        children: [
 
-                        barRods: [
-
-                          BarChartRodData(
-
-                            toY:
-                            totalUsed
-                                .toDouble(),
+                          Expanded(
+                            child: SummaryCard(
+                              title: "Added",
+                              value:
+                                  stockInTotal
+                                      .toString(),
+                              icon:
+                                  Icons.add,
+                            ),
                           ),
 
+                          const SizedBox(width: 12),
+
+                          Expanded(
+                            child: SummaryCard(
+                              title: "Used",
+                              value:
+                                  stockOutTotal
+                                      .toString(),
+                              icon:
+                                  Icons.remove,
+                            ),
+                          ),
                         ],
                       ),
 
-                      BarChartGroupData(
+                      const SizedBox(height: 12),
 
-                        x: 3,
-
-                        barRods: [
-
-                          BarChartRodData(
-
-                            toY:
-
-                            filteredTransactions
-                                .length
-
-                                .toDouble(),
-                          ),
-
-                        ],
+                      SummaryCard(
+                        title: "Most Used",
+                        value: mostUsedItem,
+                        icon:
+                            Icons.star,
                       ),
 
+                      const SizedBox(height: 24),
+
+                      const Text(
+                        "Analytics",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight:
+                              FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      _buildChart(),
+
+                      const SizedBox(height: 24),
+
+                      const Text(
+                        "Recent Transactions",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight:
+                              FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      ...transactions
+                          .reversed
+                          .take(10)
+                          .map(
+                            (transaction) =>
+                                _transactionTile(
+                              transaction,
+                            ),
+                          ),
                     ],
                   ),
                 ),
-              ),
-
-              const SizedBox(
-                  height: 30),
-
-              const Text(
-
-                "Recent Transactions",
-
-                style:
-                TextStyle(
-
-                  fontSize:
-                  20,
-
-                  fontWeight:
-                  FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(
-                  height: 12),
-
-              ...filteredTransactions
-                  .reversed
-
-                  .map(
-
-                      (transaction){
-
-                    return Card(
-
-                      shape:
-                      RoundedRectangleBorder(
-
-                        borderRadius:
-                        BorderRadius.circular(
-                            20),
-                      ),
-
-                      child:
-                      ListTile(
-
-                        leading:
-                        CircleAvatar(
-
-                          backgroundColor:
-
-                          transaction.type
-                              ==
-                              "In"
-
-                              ?
-
-                          Colors.green
-                              .withOpacity(
-                              .15)
-
-                              :
-
-                          Colors.red
-                              .withOpacity(
-                              .15),
-
-                          child:
-                          Icon(
-
-                            transaction.type
-                                ==
-                                "In"
-
-                                ?
-
-                            Icons.arrow_downward
-
-                                :
-
-                            Icons.arrow_upward,
-
-                            color:
-
-                            transaction.type
-                                ==
-                                "In"
-
-                                ?
-
-                            Colors.green
-
-                                :
-
-                            Colors.red,
-                          ),
-                        ),
-
-                        title:
-                        Text(
-
-                            transaction
-                                .itemName),
-
-                        subtitle:
-                        Text(
-
-                          transaction
-                              .date
-
-                              .toString()
-
-                              .substring(
-                              0,
-                              16),
-                        ),
-
-                        trailing:
-                        Text(
-
-                          "${transaction.type} ${transaction.quantity}",
-
-                          style:
-                          TextStyle(
-
-                            fontWeight:
-                            FontWeight.bold,
-
-                            color:
-
-                            transaction.type
-                                ==
-                                "In"
-
-                                ?
-
-                            Colors.green
-
-                                :
-
-                            Colors.red,
-                          ),
-                        ),
-                      ),
-                    );
-
-                  }),
-
-              const SizedBox(
-                  height: 80),
-
-            ],
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _transactionTile(
+    TransactionModel t,
+  ) {
+    bool isIn = t.type == "IN";
+
+    return Container(
+      margin:
+          const EdgeInsets.only(
+        bottom: 12,
+      ),
+
+      padding:
+          const EdgeInsets.all(14),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+
+        borderRadius:
+            BorderRadius.circular(
+          16,
+        ),
+      ),
+
+      child: Row(
+        children: [
+
+          CircleAvatar(
+            backgroundColor:
+                isIn
+                    ? Colors.green
+                    : Colors.red,
+
+            child: Icon(
+              isIn
+                  ? Icons.arrow_downward
+                  : Icons.arrow_upward,
+
+              color: Colors.white,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment
+                      .start,
+
+              children: [
+
+                Text(
+                  t.itemName,
+
+                  style:
+                      const TextStyle(
+                    fontWeight:
+                        FontWeight
+                            .bold,
+                  ),
+                ),
+
+                Text(
+                  t.date,
+                ),
+              ],
+            ),
+          ),
+
+          Text(
+            "${isIn ? "+" : "-"}${t.quantity}",
+
+            style: TextStyle(
+              fontWeight:
+                  FontWeight.bold,
+
+              color:
+                  isIn
+                      ? Colors.green
+                      : Colors.red,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChart() {
+    double inHeight =
+        stockInTotal == 0
+            ? 20
+            : stockInTotal.toDouble();
+
+    double outHeight =
+        stockOutTotal == 0
+            ? 20
+            : stockOutTotal.toDouble();
+
+    return Container(
+      padding:
+          const EdgeInsets.all(16),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+
+        borderRadius:
+            BorderRadius.circular(
+          20,
+        ),
+      ),
+
+      child: SizedBox(
+        height: 180,
+
+        child: Row(
+          mainAxisAlignment:
+              MainAxisAlignment
+                  .spaceEvenly,
+
+          crossAxisAlignment:
+              CrossAxisAlignment
+                  .end,
+
+          children: [
+
+            _bar(
+              "IN",
+              inHeight,
+              Colors.green,
+            ),
+
+            _bar(
+              "OUT",
+              outHeight,
+              Colors.red,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _bar(
+    String label,
+    double height,
+    Color color,
+  ) {
+    return Column(
+      mainAxisAlignment:
+          MainAxisAlignment.end,
+
+      children: [
+
+        Container(
+          width: 60,
+
+          height:
+              height.clamp(
+                20,
+                140,
+              ),
+
+          decoration:
+              BoxDecoration(
+            color: color,
+
+            borderRadius:
+                BorderRadius.circular(
+              12,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        Text(label),
+      ],
     );
   }
 }

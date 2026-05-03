@@ -5,14 +5,13 @@ import 'screens/inventory_screen.dart';
 import 'screens/stocks_screen.dart';
 import 'screens/reports_screen.dart';
 
-import 'widgets/bottom_nav.dart';
-
 void main() {
-  runApp(const StockTrackApp());
+  runApp(
+    const StockTrackApp(),
+  );
 }
 
 class StockTrackApp extends StatelessWidget {
-
   const StockTrackApp({
     super.key,
   });
@@ -26,84 +25,166 @@ class StockTrackApp extends StatelessWidget {
       false,
 
       theme: ThemeData(
-
-        scaffoldBackgroundColor:
-        const Color(0xffF5F7FB),
-
-        useMaterial3:
-        true,
+        useMaterial3: true,
       ),
 
       home:
-      const MainScreen(),
+      const MainNavigation(),
     );
   }
 }
 
-class MainScreen extends StatefulWidget {
+class MainNavigation
+    extends StatefulWidget {
 
-  const MainScreen({
+  const MainNavigation({
     super.key,
   });
 
   @override
-  State<MainScreen> createState() =>
-      _MainScreenState();
+  State<MainNavigation>
+  createState() =>
+      _MainNavigationState();
 }
 
-class _MainScreenState
-    extends State<MainScreen> {
+class _MainNavigationState
+    extends State<
+        MainNavigation> {
 
   int currentIndex = 0;
 
-  late final List<Widget> screens;
+  final screens = const [
+
+    HomeScreen(),
+
+    InventoryScreen(),
+
+    StockScreen(),
+
+    ReportsScreen(),
+
+  ];
 
   @override
-  void initState() {
-
-    super.initState();
-
-    screens = const [
-
-      HomeScreen(),
-
-      InventoryScreen(),
-
-      StockScreen(),
-
-      ReportsScreen(),
-
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(
+      BuildContext context) {
 
     return Scaffold(
 
-      body:
-      SafeArea(
+      backgroundColor:
+      Colors.grey.shade300,
 
-        child:
-        screens[currentIndex],
-      ),
+      body: Center(
 
-      bottomNavigationBar:
-      BottomNav(
+        child: Container(
 
-        index:
-        currentIndex,
+          width: 390,
+          height: 844,
 
-        onTap:
-            (value){
+          decoration:
+          BoxDecoration(
 
-          setState(() {
+            color:
+            const Color(
+                0xffF8FAFC),
 
-            currentIndex =
-                value;
+            borderRadius:
+            BorderRadius.circular(
+                35),
 
-          });
-        },
+            boxShadow: [
+
+              BoxShadow(
+
+                color:
+                Colors.black
+                    .withOpacity(.15),
+
+                blurRadius:
+                20,
+
+              ),
+
+            ],
+          ),
+
+          clipBehavior:
+          Clip.antiAlias,
+
+          child: Scaffold(
+
+            body:
+            SafeArea(
+
+              child:
+              screens[
+              currentIndex],
+            ),
+
+            bottomNavigationBar:
+            BottomNavigationBar(
+
+              currentIndex:
+              currentIndex,
+
+              onTap:
+                  (index){
+
+                setState(() {
+
+                  currentIndex =
+                      index;
+
+                });
+
+              },
+
+              type:
+              BottomNavigationBarType
+                  .fixed,
+
+              selectedItemColor:
+              const Color(
+                  0xff2563EB),
+
+              items: const [
+
+                BottomNavigationBarItem(
+                  icon:
+                  Icon(
+                      Icons.home),
+                  label:
+                  "Home",
+                ),
+
+                BottomNavigationBarItem(
+                  icon:
+                  Icon(
+                      Icons.inventory_2),
+                  label:
+                  "Inventory",
+                ),
+
+                BottomNavigationBarItem(
+                  icon:
+                  Icon(
+                      Icons.swap_horiz),
+                  label:
+                  "Stock",
+                ),
+
+                BottomNavigationBarItem(
+                  icon:
+                  Icon(
+                      Icons.bar_chart),
+                  label:
+                  "Reports",
+                ),
+
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
