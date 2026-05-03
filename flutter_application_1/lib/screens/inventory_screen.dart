@@ -303,103 +303,169 @@ class _InventoryScreenState
 
   void addItemModal() {
 
-    final name =
-    TextEditingController();
+  final name =
+  TextEditingController();
 
-    final qty =
-    TextEditingController();
+  final qty =
+  TextEditingController();
 
-    String selected =
-        "Foods";
+  String category =
+      "Foods";
 
-    showDialog(
+  showDialog(
 
-      context: context,
+    context: context,
 
-      builder: (_) {
+    builder: (_) {
 
-        return AlertDialog(
+      return StatefulBuilder(
 
-          title:
-          const Text(
-              "Add Item"),
+        builder:
+            (_, setDialog) {
 
-          content:
-          Column(
+          return AlertDialog(
 
-            mainAxisSize:
-            MainAxisSize.min,
+            title:
+            const Text(
+                "Add Item"),
 
-            children: [
+            content:
+            Column(
 
-              TextField(
+              mainAxisSize:
+              MainAxisSize.min,
 
-                controller: name,
+              children: [
 
-                decoration:
-                const InputDecoration(
-                  labelText: "Name",
+                TextField(
+
+                  controller:
+                  name,
+
+                  decoration:
+                  const InputDecoration(
+
+                    labelText:
+                    "Name",
+                  ),
                 ),
-              ),
 
-              TextField(
+                const SizedBox(
+                    height: 12),
 
-                controller: qty,
+                TextField(
 
-                keyboardType:
-                TextInputType.number,
+                  controller:
+                  qty,
 
-                decoration:
-                const InputDecoration(
-                  labelText: "Quantity",
+                  keyboardType:
+                  TextInputType.number,
+
+                  decoration:
+                  const InputDecoration(
+
+                    labelText:
+                    "Quantity",
+                  ),
                 ),
-              ),
 
-            ],
-          ),
+                const SizedBox(
+                    height: 12),
 
-          actions: [
+                DropdownButton<
+                    String>(
 
-            ElevatedButton(
+                  isExpanded:
+                  true,
 
-              onPressed: () {
+                  value:
+                  category,
 
-                setState(() {
+                  items:
+                  const [
 
-                  inventory.add({
+                    DropdownMenuItem(
 
-                    "name":
-                    name.text,
+                      value:
+                      "Foods",
 
-                    "category":
-                    selected,
+                      child:
+                      Text(
+                          "Foods"),
+                    ),
 
-                    "quantity":
-                    int.parse(
-                        qty.text),
+                    DropdownMenuItem(
 
-                    "threshold":
-                    5,
+                      value:
+                      "Supplies",
+
+                      child:
+                      Text(
+                          "Supplies"),
+                    ),
+
+                  ],
+
+                  onChanged:
+                      (value) {
+
+                    setDialog(() {
+
+                      category =
+                          value!;
+
+                    });
+
+                  },
+                ),
+
+              ],
+            ),
+
+            actions: [
+
+              ElevatedButton(
+
+                onPressed: () {
+
+                  setState(() {
+
+                    inventory.add({
+
+                      "name":
+                      name.text,
+
+                      "category":
+                      category,
+
+                      "quantity":
+                      int.parse(
+                          qty.text),
+
+                      "threshold":
+                      5,
+
+                    });
 
                   });
 
-                });
+                  Navigator.pop(
+                      context);
 
-                Navigator.pop(
-                    context);
+                },
 
-              },
+                child:
+                const Text(
+                    "Save"),
+              ),
 
-              child:
-              const Text(
-                  "Save"),
-            ),
-
-          ],
-        );
-      },
-    );
-  }
+            ],
+          );
+        },
+      );
+    },
+  );
+}
 
   void editQuantity(
       Map<String, dynamic> item) {
