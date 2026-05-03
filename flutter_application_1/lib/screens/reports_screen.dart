@@ -1,463 +1,538 @@
 import 'package:flutter/material.dart';
 
-import '../data/app_data.dart';
-import '../models/item_model.dart';
-import '../models/transaction_model.dart';
-
-import '../widgets/mobile_frame.dart';
 import '../widgets/app_header.dart';
-import '../widgets/category_tab.dart';
-import '../widgets/summary_card.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
 
   @override
-  State<ReportsScreen> createState() => _ReportsScreenState();
+  State<ReportsScreen> createState() =>
+      _ReportsScreenState();
 }
 
-class _ReportsScreenState extends State<ReportsScreen> {
-  String selectedFilter = "Today";
+class _ReportsScreenState
+    extends State<ReportsScreen> {
 
-  List<ItemModel> get inventory => AppData.inventory;
-  List<TransactionModel> get transactions => AppData.transactions;
+  String filter = "Weekly";
 
-  int get totalItems {
-    int total = 0;
+  final Map<String, int> usageData = {
 
-    for (var item in inventory) {
-      total += item.quantity;
-    }
+    "Soap": 90,
+    "Shampoo": 70,
+    "Can Goods": 50,
+    "Noodles": 30,
 
-    return total;
-  }
-
-  int get lowStockCount {
-    int count = 0;
-
-    for (var item in inventory) {
-      if (item.quantity <= item.threshold) {
-        count++;
-      }
-    }
-
-    return count;
-  }
-
-  int get stockInTotal {
-    int total = 0;
-
-    for (var t in transactions) {
-      if (t.type == "IN") {
-        total += t.quantity;
-      }
-    }
-
-    return total;
-  }
-
-  int get stockOutTotal {
-    int total = 0;
-
-    for (var t in transactions) {
-      if (t.type == "OUT") {
-        total += t.quantity;
-      }
-    }
-
-    return total;
-  }
-
-  String get mostUsedItem {
-    Map<String, int> usage = {};
-
-    for (var t in transactions) {
-      if (t.type == "OUT") {
-        usage[t.itemName] =
-            (usage[t.itemName] ?? 0) + t.quantity;
-      }
-    }
-
-    if (usage.isEmpty) return "-";
-
-    String winner = usage.keys.first;
-    int highest = usage[winner]!;
-
-    usage.forEach((key, value) {
-      if (value > highest) {
-        winner = key;
-        highest = value;
-      }
-    });
-
-    return winner;
-  }
+  };
 
   @override
   Widget build(BuildContext context) {
-    return MobileFrame(
-      child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
 
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+    final totalUsed =
+        usageData.values.reduce(
+                (a, b) => a + b);
 
-            child: Column(
-              children: [
+    final mostUsed =
+        usageData.entries.reduce(
+                (a, b) =>
+            a.value > b.value
+                ? a
+                : b);
 
-                const AppHeader(
-                  title: "Reports",
-                ),
+    return Scaffold(
 
-                const SizedBox(height: 16),
+      backgroundColor:
+      const Color(0xffF8FAFC),
 
-                Row(
-                  children: [
-
-                    Expanded(
-                      child: CategoryTab(
-                        title: "Today",
-                        selected:
-                            selectedFilter == "Today",
-                        onTap: () {
-                          setState(() {
-                            selectedFilter = "Today";
-                          });
-                        },
-                      ),
-                    ),
-
-                    const SizedBox(width: 8),
-
-                    Expanded(
-                      child: CategoryTab(
-                        title: "Weekly",
-                        selected:
-                            selectedFilter == "Weekly",
-                        onTap: () {
-                          setState(() {
-                            selectedFilter = "Weekly";
-                          });
-                        },
-                      ),
-                    ),
-
-                    const SizedBox(width: 8),
-
-                    Expanded(
-                      child: CategoryTab(
-                        title: "Monthly",
-                        selected:
-                            selectedFilter == "Monthly",
-                        onTap: () {
-                          setState(() {
-                            selectedFilter = "Monthly";
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-
-                Expanded(
-                  child: ListView(
-                    children: [
-
-                      Row(
-                        children: [
-
-                          Expanded(
-                            child: SummaryCard(
-                              title: "Total Items",
-                              value:
-                                  totalItems.toString(),
-                              icon: Icons.inventory,
-                            ),
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          Expanded(
-                            child: SummaryCard(
-                              title: "Low Stock",
-                              value:
-                                  lowStockCount
-                                      .toString(),
-                              icon:
-                                  Icons.warning,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      Row(
-                        children: [
-
-                          Expanded(
-                            child: SummaryCard(
-                              title: "Added",
-                              value:
-                                  stockInTotal
-                                      .toString(),
-                              icon:
-                                  Icons.add,
-                            ),
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          Expanded(
-                            child: SummaryCard(
-                              title: "Used",
-                              value:
-                                  stockOutTotal
-                                      .toString(),
-                              icon:
-                                  Icons.remove,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      SummaryCard(
-                        title: "Most Used",
-                        value: mostUsedItem,
-                        icon:
-                            Icons.star,
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      const Text(
-                        "Analytics",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight:
-                              FontWeight.bold,
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      _buildChart(),
-
-                      const SizedBox(height: 24),
-
-                      const Text(
-                        "Recent Transactions",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight:
-                              FontWeight.bold,
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      ...transactions
-                          .reversed
-                          .take(10)
-                          .map(
-                            (transaction) =>
-                                _transactionTile(
-                              transaction,
-                            ),
-                          ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _transactionTile(
-    TransactionModel t,
-  ) {
-    bool isIn = t.type == "IN";
-
-    return Container(
-      margin:
-          const EdgeInsets.only(
-        bottom: 12,
+      appBar:
+      const AppHeader(
+        title: "Reports",
       ),
 
-      padding:
-          const EdgeInsets.all(14),
+      body: Padding(
 
-      decoration: BoxDecoration(
-        color: Colors.white,
+        padding:
+        const EdgeInsets.all(16),
 
-        borderRadius:
-            BorderRadius.circular(
-          16,
-        ),
-      ),
-
-      child: Row(
-        children: [
-
-          CircleAvatar(
-            backgroundColor:
-                isIn
-                    ? Colors.green
-                    : Colors.red,
-
-            child: Icon(
-              isIn
-                  ? Icons.arrow_downward
-                  : Icons.arrow_upward,
-
-              color: Colors.white,
-            ),
-          ),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment
-                      .start,
-
-              children: [
-
-                Text(
-                  t.itemName,
-
-                  style:
-                      const TextStyle(
-                    fontWeight:
-                        FontWeight
-                            .bold,
-                  ),
-                ),
-
-                Text(
-                  t.date,
-                ),
-              ],
-            ),
-          ),
-
-          Text(
-            "${isIn ? "+" : "-"}${t.quantity}",
-
-            style: TextStyle(
-              fontWeight:
-                  FontWeight.bold,
-
-              color:
-                  isIn
-                      ? Colors.green
-                      : Colors.red,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChart() {
-    double inHeight =
-        stockInTotal == 0
-            ? 20
-            : stockInTotal.toDouble();
-
-    double outHeight =
-        stockOutTotal == 0
-            ? 20
-            : stockOutTotal.toDouble();
-
-    return Container(
-      padding:
-          const EdgeInsets.all(16),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        borderRadius:
-            BorderRadius.circular(
-          20,
-        ),
-      ),
-
-      child: SizedBox(
-        height: 180,
-
-        child: Row(
-          mainAxisAlignment:
-              MainAxisAlignment
-                  .spaceEvenly,
-
-          crossAxisAlignment:
-              CrossAxisAlignment
-                  .end,
+        child: ListView(
 
           children: [
 
-            _bar(
-              "IN",
-              inHeight,
-              Colors.green,
+            Row(
+
+              children: [
+
+                filterTab("Today"),
+                filterTab("Weekly"),
+                filterTab("Monthly"),
+
+              ],
             ),
 
-            _bar(
-              "OUT",
-              outHeight,
-              Colors.red,
+            const SizedBox(height: 20),
+
+            const Text(
+
+              "Summary",
+
+              style: TextStyle(
+
+                fontSize: 22,
+                fontWeight:
+                FontWeight.bold,
+
+              ),
             ),
+
+            const SizedBox(height: 16),
+
+            Row(
+
+              children: [
+
+                summaryCard(
+                  "Total Added",
+                  "320",
+                  Colors.blue,
+                  Icons.add_box,
+                ),
+
+                const SizedBox(width: 12),
+
+                summaryCard(
+                  "Total Used",
+                  "$totalUsed",
+                  Colors.green,
+                  Icons.remove_circle,
+                ),
+
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            summaryCard(
+              "Most Used",
+              mostUsed.key,
+              Colors.orange,
+              Icons.star,
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+
+              "Most Used Items",
+
+              style: TextStyle(
+
+                fontSize: 20,
+                fontWeight:
+                FontWeight.bold,
+
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Container(
+
+              padding:
+              const EdgeInsets.all(16),
+
+              decoration:
+              BoxDecoration(
+
+                color: Colors.white,
+
+                borderRadius:
+                BorderRadius.circular(20),
+
+                boxShadow: [
+
+                  BoxShadow(
+
+                    color:
+                    Colors.grey
+                        .withOpacity(.1),
+
+                    blurRadius: 8,
+
+                  )
+
+                ],
+              ),
+
+              child:
+              Column(
+
+                children:
+
+                usageData.entries
+                    .map(
+                        (entry){
+
+                      return buildBar(
+
+                        entry.key,
+                        entry.value,
+
+                      );
+
+                    })
+                    .toList(),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            Row(
+
+              children: [
+
+                Expanded(
+
+                  child:
+                  exportButton(
+
+                    "Export PDF",
+                    Icons.picture_as_pdf,
+
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                Expanded(
+
+                  child:
+                  exportButton(
+
+                    "Export Excel",
+                    Icons.table_chart,
+
+                  ),
+                ),
+
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
           ],
         ),
       ),
     );
   }
 
-  Widget _bar(
-    String label,
-    double height,
-    Color color,
-  ) {
-    return Column(
-      mainAxisAlignment:
-          MainAxisAlignment.end,
+  Widget filterTab(
+      String text) {
 
-      children: [
+    final selected =
+        filter == text;
 
-        Container(
-          width: 60,
+    return Expanded(
 
-          height:
-              height.clamp(
-                20,
-                140,
-              ),
+      child: Padding(
 
-          decoration:
-              BoxDecoration(
-            color: color,
+        padding:
+        const EdgeInsets.symmetric(
+            horizontal: 4),
 
-            borderRadius:
-                BorderRadius.circular(
-              12,
+        child:
+        ElevatedButton(
+
+          onPressed: () {
+
+            setState(() {
+
+              filter = text;
+
+            });
+
+          },
+
+          style:
+          ElevatedButton
+              .styleFrom(
+
+            backgroundColor:
+
+            selected
+
+                ? const Color(
+                0xff2563EB)
+
+                : Colors.white,
+
+            foregroundColor:
+
+            selected
+
+                ? Colors.white
+
+                : Colors.black,
+
+            shape:
+            RoundedRectangleBorder(
+
+              borderRadius:
+              BorderRadius.circular(25),
+
             ),
           ),
+
+          child: Text(text),
+        ),
+      ),
+    );
+  }
+
+  Widget summaryCard(
+
+      String title,
+      String value,
+      Color color,
+      IconData icon,
+
+      ) {
+
+    return Expanded(
+
+      child:
+      Container(
+
+        padding:
+        const EdgeInsets.all(16),
+
+        decoration:
+        BoxDecoration(
+
+          color: Colors.white,
+
+          borderRadius:
+          BorderRadius.circular(20),
+
+          boxShadow: [
+
+            BoxShadow(
+
+              color:
+              Colors.grey
+                  .withOpacity(.1),
+
+              blurRadius: 8,
+
+            )
+
+          ],
         ),
 
-        const SizedBox(height: 8),
+        child:
+        Column(
 
-        Text(label),
-      ],
+          children: [
+
+            Icon(
+              icon,
+              color: color,
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+
+              title,
+
+              style:
+              const TextStyle(
+
+                fontWeight:
+                FontWeight.bold,
+
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+
+              value,
+
+              style:
+              TextStyle(
+
+                fontSize: 20,
+
+                fontWeight:
+                FontWeight.bold,
+
+                color: color,
+
+              ),
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildBar(
+
+      String name,
+      int value,
+
+      ) {
+
+    Color barColor =
+    Colors.green;
+
+    if (value < 80) {
+
+      barColor =
+      Colors.orange;
+
+    }
+
+    if (value < 60) {
+
+      barColor =
+      Colors.red;
+
+    }
+
+    return Padding(
+
+      padding:
+      const EdgeInsets.only(
+          bottom: 16),
+
+      child:
+      Column(
+
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
+
+        children: [
+
+          Text(
+
+            name,
+
+            style:
+            const TextStyle(
+
+              fontWeight:
+              FontWeight.bold,
+
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Row(
+
+            children: [
+
+              Expanded(
+
+                child:
+                Container(
+
+                  height: 18,
+
+                  decoration:
+                  BoxDecoration(
+
+                    color:
+                    Colors.grey
+                        .withOpacity(.15),
+
+                    borderRadius:
+                    BorderRadius.circular(
+                        20),
+
+                  ),
+
+                  child:
+                  FractionallySizedBox(
+
+                    alignment:
+                    Alignment.centerLeft,
+
+                    widthFactor:
+                    value / 100,
+
+                    child:
+                    Container(
+
+                      decoration:
+                      BoxDecoration(
+
+                        color:
+                        barColor,
+
+                        borderRadius:
+                        BorderRadius.circular(
+                            20),
+
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              Text("$value"),
+
+            ],
+          ),
+
+        ],
+      ),
+    );
+  }
+
+  Widget exportButton(
+
+      String text,
+      IconData icon,
+
+      ) {
+
+    return ElevatedButton.icon(
+
+      onPressed: () {},
+
+      icon: Icon(icon),
+
+      label: Text(text),
+
+      style:
+      ElevatedButton
+          .styleFrom(
+
+        backgroundColor:
+        Colors.white,
+
+        foregroundColor:
+        const Color(
+            0xff2563EB),
+
+        shape:
+        RoundedRectangleBorder(
+
+          borderRadius:
+          BorderRadius.circular(18),
+
+        ),
+
+        padding:
+        const EdgeInsets.symmetric(
+            vertical: 14),
+
+      ),
     );
   }
 }

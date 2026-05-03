@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../data/app_data.dart';
 
-import '../models/item_model.dart';
-import '../models/transaction_model.dart';
-
 import '../widgets/app_header.dart';
-import '../widgets/mobile_frame.dart';
-import '../widgets/category_tab.dart';
-import '../widgets/stock_card.dart';
+import '../widgets/gradient_button.dart';
 
 class StockScreen
     extends StatefulWidget {
@@ -24,512 +19,232 @@ class StockScreen
 }
 
 class _StockScreenState
-    extends State<StockScreen> {
+    extends State<
+        StockScreen> {
 
-  String selectedTab =
+  String filter =
       "All";
-
-  String selectedType =
-      "In";
-
-  ItemModel?
-  selectedItem;
-
-  final TextEditingController
-  quantityController =
-  TextEditingController();
-
-  List<TransactionModel>
-  get filteredTransactions {
-
-    if(
-    selectedTab ==
-        "All"){
-
-      return transactions;
-    }
-
-    return transactions.where(
-            (transaction){
-
-          return
-
-              transaction
-                  .type
-
-                  ==
-
-                  selectedTab;
-
-        }).toList();
-  }
-
-  @override
-  void initState(){
-
-    super.initState();
-
-    if(
-    inventory
-        .isNotEmpty){
-
-      selectedItem =
-      inventory.first;
-
-    }
-  }
 
   @override
   Widget build(
       BuildContext context) {
 
-    return MobileFrame(
+    final items =
+    transactions.where(
+            (tx){
 
-      child:
-      Scaffold(
+          if(
+          filter=="All"){
+            return true;
+          }
 
-        backgroundColor:
-        const Color(
-            0xffF5F7FB),
+          return
+              tx["type"]
+                  ==
+                  filter;
 
-        appBar:
-        const AppHeader(
-          title:
-          "Stock",
-        ),
+        }).toList();
 
-        floatingActionButton:
-        FloatingActionButton(
+    return Scaffold(
 
-          backgroundColor:
-          const Color(
-              0xff2563EB),
+      backgroundColor:
+      const Color(
+          0xffF8FAFC),
 
-          onPressed:
-          showTransactionDialog,
+      appBar:
+      const AppHeader(
+        title:
+        "Stock Movement",
+      ),
 
-          child:
-          const Icon(
-              Icons.add),
-        ),
+      body: Padding(
 
-        body:
-        Padding(
+        padding:
+        const EdgeInsets.all(
+            16),
 
-          padding:
-          const EdgeInsets.all(
-              16),
+        child:
+        Column(
 
-          child:
-          Column(
+          children: [
 
-            children: [
+            Row(
 
-              Row(
+              children: [
 
-                mainAxisAlignment:
-                MainAxisAlignment
-                    .spaceBetween,
+                tab("All"),
 
-                children: [
+                tab("In"),
 
-                  CategoryTab(
+                tab("Out"),
 
-                    text:
-                    "All",
+              ],
+            ),
 
-                    active:
+            const SizedBox(
+                height: 16),
 
-                    selectedTab
-                        ==
-                        "All",
+            Expanded(
 
-                    onTap:(){
+              child:
+              ListView.builder(
 
-                      setState(() {
+                itemCount:
+                items.length,
 
-                        selectedTab =
-                        "All";
+                itemBuilder:
+                    (_, i){
 
-                      });
+                  final tx =
+                  items[i];
 
-                    },
-                  ),
+                  return Card(
 
-                  CategoryTab(
+                    shape:
+                    RoundedRectangleBorder(
 
-                    text:
-                    "In",
+                      borderRadius:
+                      BorderRadius.circular(
+                          20),
+                    ),
 
-                    active:
+                    child:
+                    ListTile(
 
-                    selectedTab
-                        ==
-                        "In",
+                      leading:
+                      Icon(
 
-                    onTap:(){
+                        tx["type"]=="In"
 
-                      setState(() {
+                            ? Icons.arrow_downward
 
-                        selectedTab =
-                        "In";
+                            : Icons.arrow_upward,
 
-                      });
+                        color:
 
-                    },
-                  ),
+                        tx["type"]=="In"
 
-                  CategoryTab(
+                            ? Colors.green
 
-                    text:
-                    "Out",
+                            : Colors.red,
+                      ),
 
-                    active:
+                      title:
+                      Text(
+                          tx["name"]),
 
-                    selectedTab
-                        ==
-                        "Out",
+                      subtitle:
+                      Text(
+                          tx["date"]),
 
-                    onTap:(){
+                      trailing:
+                      Text(
 
-                      setState(() {
+                        tx["type"]=="In"
 
-                        selectedTab =
-                        "Out";
+                            ? "+${tx["qty"]}"
 
-                      });
+                            : "-${tx["qty"]}",
 
-                    },
-                  ),
+                        style:
+                        TextStyle(
 
-                ],
+                          color:
+
+                          tx["type"]=="In"
+
+                              ? Colors.green
+
+                              : Colors.red,
+
+                          fontWeight:
+                          FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  );
+
+                },
               ),
+            ),
 
-              const SizedBox(
-                  height: 20),
+            GradientButton(
 
-              Expanded(
+              text:
+              "+ Add Transaction",
 
-                child:
-                ListView(
+              onTap:
+              addTransaction,
+            ),
 
-                  children:
-
-                  filteredTransactions
-                      .reversed
-
-                      .map(
-
-                          (transaction){
-
-                        return StockCard(
-
-                          item:
-
-                          transaction
-                              .itemName,
-
-                          type:
-
-                          transaction
-                              .type,
-
-                          qty:
-
-                          transaction
-                              .quantity,
-
-                          date:
-
-                          transaction
-                              .date
-
-                              .toString()
-
-                              .substring(
-                              0,
-                              16),
-                        );
-
-                      }).toList(),
-                ),
-              ),
-
-            ],
-          ),
+          ],
         ),
       ),
     );
   }
 
-  void showTransactionDialog(){
+  Widget tab(
+      String text){
 
-    quantityController
-        .clear();
+    final selected =
+        filter
+            ==
+            text;
 
-    selectedType =
-        "In";
+    return Expanded(
 
-    if(
-    inventory
-        .isNotEmpty){
+      child:
+      ElevatedButton(
 
-      selectedItem =
-      inventory.first;
+        onPressed:
+            (){
 
-    }
+          setState(() {
+            filter =
+                text;
+          });
 
-    showDialog(
+        },
 
-      context:
-      context,
+        style:
+        ElevatedButton
+            .styleFrom(
 
-      builder:
-          (_) {
+          backgroundColor:
 
-        return AlertDialog(
+          selected
 
-          shape:
-          RoundedRectangleBorder(
+              ? const Color(
+              0xff2563EB)
 
-            borderRadius:
-            BorderRadius.circular(
-                20),
-          ),
+              : Colors.white,
+        ),
 
-          title:
-          const Text(
-              "Add Transaction"),
-
-          content:
-          Column(
-
-            mainAxisSize:
-            MainAxisSize.min,
-
-            children: [
-
-              DropdownButton<ItemModel>(
-
-                value:
-                selectedItem,
-
-                isExpanded:
-                true,
-
-                items:
-
-                inventory.map(
-
-                        (item){
-
-                      return DropdownMenuItem(
-
-                        value:
-                        item,
-
-                        child:
-                        Text(
-                            item.name),
-                      );
-
-                    }).toList(),
-
-                onChanged:
-                    (value){
-
-                  setState(() {
-
-                    selectedItem =
-                        value;
-
-                  });
-
-                },
-              ),
-
-              const SizedBox(
-                  height: 12),
-
-              DropdownButton<String>(
-
-                value:
-                selectedType,
-
-                isExpanded:
-                true,
-
-                items:
-
-                [
-
-                  "In",
-
-                  "Out",
-
-                ].map(
-
-                        (e){
-
-                      return DropdownMenuItem(
-
-                        value:
-                        e,
-
-                        child:
-                        Text(e),
-                      );
-
-                    }).toList(),
-
-                onChanged:
-                    (value){
-
-                  setState(() {
-
-                    selectedType =
-                    value
-                    as String;
-
-                  });
-
-                },
-              ),
-
-              const SizedBox(
-                  height: 12),
-
-              TextField(
-
-                controller:
-                quantityController,
-
-                keyboardType:
-                TextInputType.number,
-
-                decoration:
-                const InputDecoration(
-
-                  labelText:
-                  "Quantity",
-                ),
-              ),
-
-            ],
-          ),
-
-          actions: [
-
-            ElevatedButton(
-
-              onPressed:
-              saveTransaction,
-
-              child:
-              const Text(
-                  "Save"),
-            ),
-
-          ],
-        );
-      },
+        child:
+        Text(text),
+      ),
     );
   }
 
-  void saveTransaction(){
-
-    if(
-    selectedItem
-        == null){
-
-      return;
-    }
-
-    if(
-    quantityController
-        .text
-        .isEmpty){
-
-      return;
-    }
-
-    final qty =
-    int.parse(
-
-        quantityController
-            .text);
-
-    if(
-    selectedType ==
-        "Out"
-
-        &&
-
-        selectedItem!
-            .quantity
-
-            <
-
-            qty){
-
-      return;
-    }
+  void addTransaction(){
 
     setState(() {
 
-      if(
-      selectedType
-          ==
-          "In"){
+      transactions.add({
 
-        selectedItem!
-            .quantity +=
-            qty;
-      }
+        "name":
+        "Rice",
 
-      else{
+        "type":
+        "In",
 
-        selectedItem!
-            .quantity -=
-            qty;
-      }
+        "qty":
+        10,
 
-      transactions.add(
-
-        TransactionModel(
-
-          itemName:
-
-          selectedItem!
-              .name,
-
-          type:
-          selectedType,
-
-          quantity:
-          qty,
-
-          date:
-          DateTime.now(),
-        ),
-      );
-
-      activities.add(
-
-          "$selectedType ${selectedItem!.name}");
+        "date":
+        "Now",
+      });
 
     });
-
-    Navigator.pop(
-        context);
-  }
-
-  @override
-  void dispose(){
-
-    quantityController
-        .dispose();
-
-    super.dispose();
   }
 }

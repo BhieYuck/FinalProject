@@ -98,6 +98,7 @@ class _MainNavigationState
 
                 color:
                 Colors.black
+                    // ignore: deprecated_member_use
                     .withOpacity(.15),
 
                 blurRadius:
