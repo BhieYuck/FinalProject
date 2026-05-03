@@ -1,209 +1,265 @@
 import 'package:flutter/material.dart';
 
-import '../models/item_model.dart';
+import '../data/app_data.dart';
 
 import '../widgets/app_header.dart';
-import '../widgets/custom_card.dart';
+import '../widgets/search_box.dart';
+import '../widgets/gradient_button.dart';
 
 class InventoryScreen
     extends StatefulWidget {
 
-  final List<ItemModel> items;
-
-  final Function(
-    String,
-    int,
-    String,
-  ) onAdd;
-
   const InventoryScreen({
     super.key,
-    required this.items,
-    required this.onAdd,
   });
 
   @override
   State<InventoryScreen>
-      createState() =>
-          _InventoryScreenState();
+  createState() =>
+      _InventoryScreenState();
 }
 
 class _InventoryScreenState
     extends State<
         InventoryScreen> {
 
-  String category = "All";
-
   String search = "";
+
+  String category =
+      "All";
 
   @override
   Widget build(
       BuildContext context) {
 
-    final filtered =
-        widget.items.where((e) {
+    final items =
+    inventory.where(
+            (item){
 
-      final categoryMatch =
-          category == "All" ||
-              e.category ==
+          final nameMatch =
+          item["name"]
+              .toLowerCase()
+              .contains(
+              search
+                  .toLowerCase());
+
+          final categoryMatch =
+
+          category=="All"
+
+              ||
+
+              item["category"]
+                  ==
                   category;
 
-      final searchMatch = e.name
-          .toLowerCase()
-          .contains(
-              search.toLowerCase());
+          return
+              nameMatch
+                  &&
+                  categoryMatch;
 
-      return categoryMatch &&
-          searchMatch;
-    }).toList();
+        }).toList();
 
     return Scaffold(
 
-      appBar: const AppHeader(
-        title: "Inventory",
+      backgroundColor:
+      const Color(
+          0xffF8FAFC),
+
+      appBar:
+      const AppHeader(
+        title:
+        "Inventory",
       ),
 
       body: Padding(
 
         padding:
-            const EdgeInsets.all(
-          12,
-        ),
+        const EdgeInsets.all(
+            16),
 
-        child: Column(
+        child:
+        Column(
 
           children: [
 
-            TextField(
+            SearchBox(
 
-              onChanged: (value) {
+              onChanged:
+                  (value){
 
                 setState(() {
-                  search = value;
+                  search =
+                      value;
                 });
 
               },
-
-              decoration:
-                  InputDecoration(
-
-                hintText:
-                    "Search...",
-
-                prefixIcon:
-                    const Icon(
-                  Icons.search,
-                ),
-
-                border:
-                    OutlineInputBorder(
-
-                  borderRadius:
-                      BorderRadius
-                          .circular(
-                    30,
-                  ),
-                ),
-              ),
             ),
 
             const SizedBox(
-              height: 12,
-            ),
+                height: 16),
 
             Row(
 
               children: [
 
-                filterButton(
+                tab(
                     "All"),
 
-                filterButton(
-                    "Food"),
+                tab(
+                    "Foods"),
 
-                filterButton(
+                tab(
                     "Supplies"),
 
               ],
             ),
 
             const SizedBox(
-              height: 12,
-            ),
+                height: 16),
 
             Expanded(
 
               child:
-                  ListView.builder(
+              ListView.builder(
 
                 itemCount:
-                    filtered
-                        .length,
+                items.length,
 
                 itemBuilder:
-                    (_, index) {
+                    (_, i){
 
                   final item =
-                      filtered[
-                          index];
+                  items[i];
 
-                  return CustomCard(
+                  final qty =
+                  item[
+                  "quantity"];
+
+                  final threshold =
+                  item[
+                  "threshold"];
+
+                  String status =
+                      "In Stock";
+
+                  Color color =
+                  Colors.green;
+
+                  if(
+                  qty==0){
+
+                    status =
+                    "Out";
+
+                    color =
+                    Colors.red;
+
+                  }
+
+                  else if(
+                  qty<=threshold){
+
+                    status =
+                    "Low";
+
+                    color =
+                    Colors.orange;
+
+                  }
+
+                  return Card(
+
+                    elevation: 1,
+
+                    shape:
+                    RoundedRectangleBorder(
+
+                      borderRadius:
+                      BorderRadius.circular(
+                          20),
+                    ),
 
                     child:
-                        Row(
+                    ListTile(
 
-                      mainAxisAlignment:
-                          MainAxisAlignment
-                              .spaceBetween,
+                      contentPadding:
+                      const EdgeInsets.all(
+                          12),
 
-                      children: [
+                      title:
+                      Text(
 
+                        item["name"],
+
+                        style:
+                        const TextStyle(
+
+                          fontWeight:
+                          FontWeight.bold,
+
+                          fontSize: 18,
+                        ),
+                      ),
+
+                      subtitle:
+                      Text(
+
+                          "${item["category"]}\n${item["quantity"]} pcs"),
+
+                      trailing:
+                      Container(
+
+                        padding:
+                        const EdgeInsets.symmetric(
+
+                          horizontal: 10,
+
+                          vertical: 6,
+                        ),
+
+                        decoration:
+                        BoxDecoration(
+
+                          color:
+                          color.withOpacity(
+                              .1),
+
+                          borderRadius:
+                          BorderRadius.circular(
+                              20),
+                        ),
+
+                        child:
                         Text(
 
-                          item.name,
+                          status,
 
                           style:
-                              const TextStyle(
-                            fontSize:
-                                18,
-                            fontWeight:
-                                FontWeight.bold,
+                          TextStyle(
+                            color:
+                            color,
                           ),
                         ),
-
-                        Text(
-                          "${item.quantity} pcs",
-                        ),
-
-                      ],
+                      ),
                     ),
                   );
+
                 },
               ),
             ),
 
-            ElevatedButton.icon(
+            const SizedBox(
+                height: 12),
 
-              style:
-                  ElevatedButton
-                      .styleFrom(
-                backgroundColor:
-                    Colors.blue,
-              ),
+            GradientButton(
 
-              onPressed:
-                  showAddDialog,
+              text:
+              "+ Add Item",
 
-              icon:
-                  const Icon(
-                Icons.add,
-              ),
-
-              label:
-                  const Text(
-                "Add Item",
-              ),
-            )
+              onTap:
+              addItemModal,
+            ),
 
           ],
         ),
@@ -211,125 +267,136 @@ class _InventoryScreenState
     );
   }
 
-  Widget filterButton(
-      String text) {
+  Widget tab(
+      String text){
+
+    final selected =
+        category
+            ==
+            text;
 
     return Expanded(
 
       child: Padding(
 
         padding:
-            const EdgeInsets.all(
-                4),
+        const EdgeInsets.symmetric(
+            horizontal: 4),
 
         child:
-            ElevatedButton(
+        ElevatedButton(
 
           style:
-              ElevatedButton
-                  .styleFrom(
+          ElevatedButton
+              .styleFrom(
 
             backgroundColor:
-                category ==
-                        text
-                    ? Colors
-                        .blue
-                    : Colors
-                        .blue
-                        .shade200,
+
+            selected
+
+                ? const Color(
+                0xff2563EB)
+
+                : Colors.white,
+
+            foregroundColor:
+
+            selected
+
+                ? Colors.white
+
+                : Colors.black,
+
+            shape:
+            RoundedRectangleBorder(
+
+              borderRadius:
+              BorderRadius.circular(
+                  18),
+            ),
           ),
 
-          onPressed: () {
+          onPressed:
+              (){
 
             setState(() {
-              category = text;
+              category =
+                  text;
             });
 
           },
 
-          child: Text(
-            text,
-          ),
+          child:
+          Text(text),
         ),
       ),
     );
   }
 
-  void showAddDialog() {
+  void addItemModal(){
 
     final name =
-        TextEditingController();
+    TextEditingController();
 
     final qty =
-        TextEditingController();
+    TextEditingController();
 
-    String cat = "Food";
+    String selected =
+        "Foods";
 
     showDialog(
 
       context: context,
 
-      builder: (_) {
+      builder:
+          (_) {
 
         return AlertDialog(
 
-          title: const Text(
-            "Add Item",
+          shape:
+          RoundedRectangleBorder(
+
+            borderRadius:
+            BorderRadius.circular(
+                20),
           ),
 
+          title:
+          const Text(
+              "Add Item"),
+
           content:
-              Column(
+          Column(
 
             mainAxisSize:
-                MainAxisSize
-                    .min,
+            MainAxisSize.min,
 
             children: [
 
               TextField(
+
                 controller:
-                    name,
+                name,
+
+                decoration:
+                const InputDecoration(
+                    labelText:
+                    "Name"),
               ),
 
               TextField(
+
                 controller:
-                    qty,
+                qty,
+
+                keyboardType:
+                TextInputType.number,
+
+                decoration:
+                const InputDecoration(
+                    labelText:
+                    "Quantity"),
               ),
-
-              DropdownButton(
-
-                value: cat,
-
-                items:
-                    const [
-
-                  DropdownMenuItem(
-                    value:
-                        "Food",
-                    child:
-                        Text(
-                      "Food",
-                    ),
-                  ),
-
-                  DropdownMenuItem(
-                    value:
-                        "Supplies",
-                    child:
-                        Text(
-                      "Supplies",
-                    ),
-                  ),
-
-                ],
-
-                onChanged:
-                    (value) {
-
-                  cat =
-                      value!;
-                },
-              )
 
             ],
           ),
@@ -338,17 +405,28 @@ class _InventoryScreenState
 
             ElevatedButton(
 
-              onPressed: () {
+              onPressed:
+                  (){
 
-                widget.onAdd(
+                setState(() {
 
-                  name.text,
+                  inventory.add({
 
-                  int.parse(
-                      qty.text),
+                    "name":
+                    name.text,
 
-                  cat,
-                );
+                    "category":
+                    selected,
+
+                    "quantity":
+                    int.parse(
+                        qty.text),
+
+                    "threshold":
+                    5,
+                  });
+
+                });
 
                 Navigator.pop(
                     context);
@@ -356,9 +434,8 @@ class _InventoryScreenState
               },
 
               child:
-                  const Text(
-                "Save",
-              ),
+              const Text(
+                  "Save"),
             )
 
           ],

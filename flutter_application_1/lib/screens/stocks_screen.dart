@@ -1,121 +1,181 @@
 import 'package:flutter/material.dart';
 
-import '../models/item_model.dart';
+import '../data/app_data.dart';
 
 import '../widgets/app_header.dart';
-import '../widgets/custom_card.dart';
+import '../widgets/gradient_button.dart';
 
-class StocksScreen
-    extends StatelessWidget {
+class StockScreen
+    extends StatefulWidget {
 
-  final List<ItemModel> items;
-
-  final Function(
-    ItemModel,
-  ) onRestock;
-
-  const StocksScreen({
+  const StockScreen({
     super.key,
-    required this.items,
-    required this.onRestock,
   });
+
+  @override
+  State<StockScreen>
+  createState() =>
+      _StockScreenState();
+}
+
+class _StockScreenState
+    extends State<
+        StockScreen> {
+
+  String filter =
+      "All";
 
   @override
   Widget build(
       BuildContext context) {
 
-    final low =
-        items.where(
-      (e) => e.isLowStock,
-    );
+    final items =
+    transactions.where(
+            (tx){
+
+          if(
+          filter=="All"){
+            return true;
+          }
+
+          return
+              tx["type"]
+                  ==
+                  filter;
+
+        }).toList();
 
     return Scaffold(
 
-      appBar: const AppHeader(
-        title: "Stocks",
+      backgroundColor:
+      const Color(
+          0xffF8FAFC),
+
+      appBar:
+      const AppHeader(
+        title:
+        "Stock Movement",
       ),
 
       body: Padding(
 
         padding:
-            const EdgeInsets.all(
-          12,
-        ),
+        const EdgeInsets.all(
+            16),
 
-        child: ListView(
+        child:
+        Column(
 
           children: [
 
-            section(
-                "Low Stocks"),
+            Row(
 
-            ...low.map((e) {
+              children: [
 
-              return CustomCard(
+                tab("All"),
 
-                child: Row(
+                tab("In"),
 
-                  mainAxisAlignment:
-                      MainAxisAlignment
-                          .spaceBetween,
+                tab("Out"),
 
-                  children: [
-
-                    Text(
-                      "${e.name}: ${e.quantity} pcs left",
-                    ),
-
-                    IconButton(
-
-                      onPressed:
-                          () {
-
-                        onRestock(
-                            e);
-
-                      },
-
-                      icon:
-                          const Icon(
-                        Icons.add_circle,
-                        color: Colors.orange,
-                      ),
-                    )
-
-                  ],
-                ),
-              );
-            }),
-
-            const SizedBox(
-              height: 20,
+              ],
             ),
 
-            section(
-                "Expiry Alerts"),
+            const SizedBox(
+                height: 16),
 
-            ...items.map((e) {
+            Expanded(
 
-              return CustomCard(
+              child:
+              ListView.builder(
 
-                child: Row(
+                itemCount:
+                items.length,
 
-                  mainAxisAlignment:
-                      MainAxisAlignment
-                          .spaceBetween,
+                itemBuilder:
+                    (_, i){
 
-                  children: [
+                  final tx =
+                  items[i];
 
-                    Text(
-                        e.name),
+                  return Card(
 
-                    Text(
-                        e.expiryText),
+                    shape:
+                    RoundedRectangleBorder(
 
-                  ],
-                ),
-              );
-            })
+                      borderRadius:
+                      BorderRadius.circular(
+                          20),
+                    ),
+
+                    child:
+                    ListTile(
+
+                      leading:
+                      Icon(
+
+                        tx["type"]=="In"
+
+                            ? Icons.arrow_downward
+
+                            : Icons.arrow_upward,
+
+                        color:
+
+                        tx["type"]=="In"
+
+                            ? Colors.green
+
+                            : Colors.red,
+                      ),
+
+                      title:
+                      Text(
+                          tx["name"]),
+
+                      subtitle:
+                      Text(
+                          tx["date"]),
+
+                      trailing:
+                      Text(
+
+                        tx["type"]=="In"
+
+                            ? "+${tx["qty"]}"
+
+                            : "-${tx["qty"]}",
+
+                        style:
+                        TextStyle(
+
+                          color:
+
+                          tx["type"]=="In"
+
+                              ? Colors.green
+
+                              : Colors.red,
+
+                          fontWeight:
+                          FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  );
+
+                },
+              ),
+            ),
+
+            GradientButton(
+
+              text:
+              "+ Add Transaction",
+
+              onTap:
+              addTransaction,
+            ),
 
           ],
         ),
@@ -123,52 +183,68 @@ class StocksScreen
     );
   }
 
-  Widget section(
-      String text) {
+  Widget tab(
+      String text){
 
-    return Container(
+    final selected =
+        filter
+            ==
+            text;
 
-      margin:
-          const EdgeInsets.only(
-        bottom: 12,
-      ),
+    return Expanded(
 
-      padding:
-          const EdgeInsets.all(
-        8,
-      ),
+      child:
+      ElevatedButton(
 
-      decoration:
-          BoxDecoration(
+        onPressed:
+            (){
 
-        color: Colors.blue,
+          setState(() {
+            filter =
+                text;
+          });
 
-        borderRadius:
-            BorderRadius.circular(
-          12,
+        },
+
+        style:
+        ElevatedButton
+            .styleFrom(
+
+          backgroundColor:
+
+          selected
+
+              ? const Color(
+              0xff2563EB)
+
+              : Colors.white,
         ),
-      ),
 
-      child: Center(
-
-        child: Text(
-
-          text,
-
-          style:
-              const TextStyle(
-
-            color:
-                Colors.white,
-
-            fontWeight:
-                FontWeight.bold,
-
-            fontSize:
-                20,
-          ),
-        ),
+        child:
+        Text(text),
       ),
     );
+  }
+
+  void addTransaction(){
+
+    setState(() {
+
+      transactions.add({
+
+        "name":
+        "Rice",
+
+        "type":
+        "In",
+
+        "qty":
+        10,
+
+        "date":
+        "Now",
+      });
+
+    });
   }
 }

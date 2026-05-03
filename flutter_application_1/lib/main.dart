@@ -1,209 +1,198 @@
 import 'package:flutter/material.dart';
 
-import 'models/item_model.dart';
-
 import 'screens/home_screen.dart';
 import 'screens/inventory_screen.dart';
 import 'screens/stocks_screen.dart';
 import 'screens/reports_screen.dart';
 
-import 'widgets/bottom_nav.dart';
-
 void main() {
-  runApp(const StockTrackApp());
+  runApp(
+    const StockTrackApp(),
+  );
 }
 
 class StockTrackApp extends StatelessWidget {
-  const StockTrackApp({super.key});
+  const StockTrackApp({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
 
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: MobileFrame(),
+    return MaterialApp(
+
+      debugShowCheckedModeBanner:
+      false,
+
+      title: "StockTrack",
+
+      theme: ThemeData(
+
+        useMaterial3: true,
+
+        scaffoldBackgroundColor:
+        const Color(0xffF8FAFC),
+
+        fontFamily: "Arial",
+      ),
+
+      home:
+      const MainNavigation(),
     );
   }
 }
 
-class MobileFrame extends StatefulWidget {
-  const MobileFrame({super.key});
+class MainNavigation
+    extends StatefulWidget {
+
+  const MainNavigation({
+    super.key,
+  });
 
   @override
-  State<MobileFrame> createState() =>
-      _MobileFrameState();
+  State<MainNavigation>
+  createState() =>
+      _MainNavigationState();
 }
 
-class _MobileFrameState
-    extends State<MobileFrame> {
+class _MainNavigationState
+    extends State<
+        MainNavigation> {
 
   int currentIndex = 0;
 
-  final List<ItemModel> items = [
+  final List<Widget>
+  screens = const [
 
-    ItemModel(
-      name: "Rice",
-      quantity: 20,
-      category: "Food",
-      usedCount: 18,
-      expiryDate:
-      DateTime.now().add(
-        const Duration(days: 90),
-      ),
-    ),
+    HomeScreen(),
 
-    ItemModel(
-      name: "Soap",
-      quantity: 2,
-      category: "Supplies",
-      usedCount: 30,
-      expiryDate:
-      DateTime.now().add(
-        const Duration(days: 14),
-      ),
-    ),
+    InventoryScreen(),
 
-    ItemModel(
-      name: "Noodles",
-      quantity: 4,
-      category: "Food",
-      usedCount: 12,
-      expiryDate:
-      DateTime.now().add(
-        const Duration(days: 20),
-      ),
-    ),
+    StockScreen(),
+
+    ReportsScreen(),
 
   ];
-
-  void addItem(
-      String name,
-      int qty,
-      String category,
-      ) {
-
-    setState(() {
-
-      items.add(
-
-        ItemModel(
-
-          name: name,
-          quantity: qty,
-          category: category,
-
-          usedCount: 0,
-
-          expiryDate:
-          DateTime.now().add(
-            const Duration(
-                days: 90),
-          ),
-        ),
-      );
-
-    });
-  }
-
-  void restockItem(
-      ItemModel item) {
-
-    setState(() {
-      item.quantity += 10;
-    });
-  }
 
   @override
   Widget build(
       BuildContext context) {
 
-    final screens = [
-
-      HomeScreen(
-        items: items,
-        onAdd: addItem,
-      ),
-
-      InventoryScreen(
-        items: items,
-        onAdd: addItem,
-      ),
-
-      StocksScreen(
-        items: items,
-        onRestock:
-        restockItem,
-      ),
-
-      ReportsScreen(
-        items: items,
-      ),
-
-    ];
-
     return Scaffold(
 
-      backgroundColor:
-      Colors.grey.shade300,
+      body:
+      SafeArea(
 
-      body: Center(
+        child:
+        screens[
+        currentIndex],
+      ),
 
-        child: Container(
+      bottomNavigationBar:
+      Container(
 
-          width: 390,
-          height: 844,
+        decoration:
+        BoxDecoration(
 
-          decoration:
-          BoxDecoration(
+          color:
+          Colors.white,
 
-            color:
-            Colors.white,
+          boxShadow: [
 
-            borderRadius:
-            BorderRadius.circular(
-                30),
+            BoxShadow(
 
-            boxShadow: [
+              color:
+              Colors.grey
+                  .withOpacity(.12),
 
-              BoxShadow(
+              blurRadius: 10,
 
-                blurRadius: 20,
-
-                color: Colors.black
-                    .withOpacity(.15),
-              )
-
-            ],
-          ),
-
-          clipBehavior:
-          Clip.antiAlias,
-
-          child: Scaffold(
-
-            body:
-            screens[
-            currentIndex],
-
-            bottomNavigationBar:
-            BottomNav(
-
-              currentIndex:
-              currentIndex,
-
-              onTap:
-                  (value){
-
-                setState(() {
-
-                  currentIndex =
-                      value;
-
-                });
-
-              },
             ),
-          ),
+
+          ],
+        ),
+
+        child:
+        BottomNavigationBar(
+
+          currentIndex:
+          currentIndex,
+
+          onTap:
+              (index){
+
+            setState(() {
+
+              currentIndex =
+                  index;
+
+            });
+
+          },
+
+          type:
+          BottomNavigationBarType
+              .fixed,
+
+          backgroundColor:
+          Colors.white,
+
+          selectedItemColor:
+          const Color(
+              0xff2563EB),
+
+          unselectedItemColor:
+          Colors.grey,
+
+          selectedFontSize:
+          12,
+
+          unselectedFontSize:
+          12,
+
+          items: const [
+
+            BottomNavigationBarItem(
+
+              icon:
+              Icon(
+                  Icons.home),
+
+              label:
+              "Home",
+            ),
+
+            BottomNavigationBarItem(
+
+              icon:
+              Icon(
+                  Icons.inventory_2),
+
+              label:
+              "Inventory",
+            ),
+
+            BottomNavigationBarItem(
+
+              icon:
+              Icon(
+                  Icons.swap_horiz),
+
+              label:
+              "Stock",
+            ),
+
+            BottomNavigationBarItem(
+
+              icon:
+              Icon(
+                  Icons.bar_chart),
+
+              label:
+              "Reports",
+            ),
+
+          ],
         ),
       ),
     );

@@ -15,36 +15,43 @@ class AppHeader extends StatelessWidget
 
     return AppBar(
 
-      backgroundColor: Colors.blue,
+      backgroundColor:
+      Colors.white,
 
       elevation: 0,
 
-      foregroundColor: Colors.white,
+      foregroundColor:
+      Colors.black,
 
-      leading: const Icon(Icons.arrow_back),
+      leading:
+      const Icon(Icons.menu),
+
+      centerTitle: true,
 
       title: Text(
 
         title,
 
         style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontStyle: FontStyle.italic,
-          fontSize: 22,
+
+          fontWeight:
+          FontWeight.bold,
+
+          fontSize: 24,
         ),
       ),
-
-      centerTitle: true,
 
       actions: const [
 
         Padding(
-          padding: EdgeInsets.only(
-            right: 16,
-          ),
-          child: Icon(
-            Icons.notifications,
-          ),
+
+          padding:
+          EdgeInsets.only(
+              right: 14),
+
+          child:
+          Icon(
+              Icons.notifications_none),
         )
 
       ],

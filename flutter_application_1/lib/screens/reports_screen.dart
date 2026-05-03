@@ -1,38 +1,59 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-
-import '../models/item_model.dart';
 
 import '../widgets/app_header.dart';
 
-class ReportsScreen
-    extends StatelessWidget {
-
-  final List<ItemModel> items;
-
-  const ReportsScreen({
-    super.key,
-    required this.items,
-  });
+class ReportsScreen extends StatefulWidget {
+  const ReportsScreen({super.key});
 
   @override
-  Widget build(
-      BuildContext context) {
+  State<ReportsScreen> createState() =>
+      _ReportsScreenState();
+}
+
+class _ReportsScreenState
+    extends State<ReportsScreen> {
+
+  String filter = "Weekly";
+
+  final Map<String, int> usageData = {
+
+    "Soap": 90,
+    "Shampoo": 70,
+    "Can Goods": 50,
+    "Noodles": 30,
+
+  };
+
+  @override
+  Widget build(BuildContext context) {
+
+    final totalUsed =
+        usageData.values.reduce(
+                (a, b) => a + b);
+
+    final mostUsed =
+        usageData.entries.reduce(
+                (a, b) =>
+            a.value > b.value
+                ? a
+                : b);
 
     return Scaffold(
 
-      appBar: const AppHeader(
+      backgroundColor:
+      const Color(0xffF8FAFC),
+
+      appBar:
+      const AppHeader(
         title: "Reports",
       ),
 
       body: Padding(
 
         padding:
-            const EdgeInsets.all(
-          12,
-        ),
+        const EdgeInsets.all(16),
 
-        child: Column(
+        child: ListView(
 
           children: [
 
@@ -40,94 +61,162 @@ class ReportsScreen
 
               children: [
 
-                tab("Daily"),
-                tab("Weekly"),
-                tab("Monthly"),
+                filterTab("Today"),
+                filterTab("Weekly"),
+                filterTab("Monthly"),
 
               ],
             ),
 
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
 
-            SizedBox(
+            const Text(
 
-              height: 250,
+              "Summary",
 
-              child:
-                  BarChart(
+              style: TextStyle(
 
-                BarChartData(
+                fontSize: 22,
+                fontWeight:
+                FontWeight.bold,
 
-                  barGroups:
-                      List.generate(
-
-                    items.length,
-
-                    (index) {
-
-                      final item =
-                          items[
-                              index];
-
-                      return BarChartGroupData(
-
-                        x: index,
-
-                        barRods: [
-
-                          BarChartRodData(
-                            toY: item
-                                .usedCount
-                                .toDouble(),
-                          )
-
-                        ],
-                      );
-                    },
-                  ),
-                ),
               ),
             ),
 
-            const SizedBox(
-              height: 20,
+            const SizedBox(height: 16),
+
+            Row(
+
+              children: [
+
+                summaryCard(
+                  "Total Added",
+                  "320",
+                  Colors.blue,
+                  Icons.add_box,
+                ),
+
+                const SizedBox(width: 12),
+
+                summaryCard(
+                  "Total Used",
+                  "$totalUsed",
+                  Colors.green,
+                  Icons.remove_circle,
+                ),
+
+              ],
             ),
+
+            const SizedBox(height: 12),
+
+            summaryCard(
+              "Most Used",
+              mostUsed.key,
+              Colors.orange,
+              Icons.star,
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+
+              "Most Used Items",
+
+              style: TextStyle(
+
+                fontSize: 20,
+                fontWeight:
+                FontWeight.bold,
+
+              ),
+            ),
+
+            const SizedBox(height: 20),
 
             Container(
 
               padding:
-                  const EdgeInsets
-                      .all(
-                12,
-              ),
+              const EdgeInsets.all(16),
 
-              color:
-                  Colors.grey
-                      .shade300,
+              decoration:
+              BoxDecoration(
 
-              child:
-                  const Column(
+                color: Colors.white,
 
-                crossAxisAlignment:
-                    CrossAxisAlignment
-                        .start,
+                borderRadius:
+                BorderRadius.circular(20),
 
-                children: [
+                boxShadow: [
 
-                  Text(
-                      "Summary"),
+                  BoxShadow(
 
-                  Text(
-                      "• Most Used: Soap"),
+                    color:
+                    Colors.grey
+                        .withOpacity(.1),
 
-                  Text(
-                      "• Last Used: Noodles"),
+                    blurRadius: 8,
+
+                  )
 
                 ],
               ),
-            )
+
+              child:
+              Column(
+
+                children:
+
+                usageData.entries
+                    .map(
+                        (entry){
+
+                      return buildBar(
+
+                        entry.key,
+                        entry.value,
+
+                      );
+
+                    })
+                    .toList(),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            Row(
+
+              children: [
+
+                Expanded(
+
+                  child:
+                  exportButton(
+
+                    "Export PDF",
+                    Icons.picture_as_pdf,
+
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                Expanded(
+
+                  child:
+                  exportButton(
+
+                    "Export Excel",
+                    Icons.table_chart,
+
+                  ),
+                ),
+
+              ],
+            ),
+
+            const SizedBox(height: 20),
 
           ],
         ),
@@ -135,19 +224,314 @@ class ReportsScreen
     );
   }
 
-  Widget tab(
+  Widget filterTab(
       String text) {
+
+    final selected =
+        filter == text;
+
+    return Expanded(
+
+      child: Padding(
+
+        padding:
+        const EdgeInsets.symmetric(
+            horizontal: 4),
+
+        child:
+        ElevatedButton(
+
+          onPressed: () {
+
+            setState(() {
+
+              filter = text;
+
+            });
+
+          },
+
+          style:
+          ElevatedButton
+              .styleFrom(
+
+            backgroundColor:
+
+            selected
+
+                ? const Color(
+                0xff2563EB)
+
+                : Colors.white,
+
+            foregroundColor:
+
+            selected
+
+                ? Colors.white
+
+                : Colors.black,
+
+            shape:
+            RoundedRectangleBorder(
+
+              borderRadius:
+              BorderRadius.circular(25),
+
+            ),
+          ),
+
+          child: Text(text),
+        ),
+      ),
+    );
+  }
+
+  Widget summaryCard(
+
+      String title,
+      String value,
+      Color color,
+      IconData icon,
+
+      ) {
 
     return Expanded(
 
       child:
-          ElevatedButton(
+      Container(
 
-        onPressed: () {},
+        padding:
+        const EdgeInsets.all(16),
 
-        child: Text(
-          text,
+        decoration:
+        BoxDecoration(
+
+          color: Colors.white,
+
+          borderRadius:
+          BorderRadius.circular(20),
+
+          boxShadow: [
+
+            BoxShadow(
+
+              color:
+              Colors.grey
+                  .withOpacity(.1),
+
+              blurRadius: 8,
+
+            )
+
+          ],
         ),
+
+        child:
+        Column(
+
+          children: [
+
+            Icon(
+              icon,
+              color: color,
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+
+              title,
+
+              style:
+              const TextStyle(
+
+                fontWeight:
+                FontWeight.bold,
+
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+
+              value,
+
+              style:
+              TextStyle(
+
+                fontSize: 20,
+
+                fontWeight:
+                FontWeight.bold,
+
+                color: color,
+
+              ),
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildBar(
+
+      String name,
+      int value,
+
+      ) {
+
+    Color barColor =
+    Colors.green;
+
+    if (value < 80) {
+
+      barColor =
+      Colors.orange;
+
+    }
+
+    if (value < 60) {
+
+      barColor =
+      Colors.red;
+
+    }
+
+    return Padding(
+
+      padding:
+      const EdgeInsets.only(
+          bottom: 16),
+
+      child:
+      Column(
+
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
+
+        children: [
+
+          Text(
+
+            name,
+
+            style:
+            const TextStyle(
+
+              fontWeight:
+              FontWeight.bold,
+
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Row(
+
+            children: [
+
+              Expanded(
+
+                child:
+                Container(
+
+                  height: 18,
+
+                  decoration:
+                  BoxDecoration(
+
+                    color:
+                    Colors.grey
+                        .withOpacity(.15),
+
+                    borderRadius:
+                    BorderRadius.circular(
+                        20),
+
+                  ),
+
+                  child:
+                  FractionallySizedBox(
+
+                    alignment:
+                    Alignment.centerLeft,
+
+                    widthFactor:
+                    value / 100,
+
+                    child:
+                    Container(
+
+                      decoration:
+                      BoxDecoration(
+
+                        color:
+                        barColor,
+
+                        borderRadius:
+                        BorderRadius.circular(
+                            20),
+
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              Text("$value"),
+
+            ],
+          ),
+
+        ],
+      ),
+    );
+  }
+
+  Widget exportButton(
+
+      String text,
+      IconData icon,
+
+      ) {
+
+    return ElevatedButton.icon(
+
+      onPressed: () {},
+
+      icon: Icon(icon),
+
+      label: Text(text),
+
+      style:
+      ElevatedButton
+          .styleFrom(
+
+        backgroundColor:
+        Colors.white,
+
+        foregroundColor:
+        const Color(
+            0xff2563EB),
+
+        shape:
+        RoundedRectangleBorder(
+
+          borderRadius:
+          BorderRadius.circular(18),
+
+        ),
+
+        padding:
+        const EdgeInsets.symmetric(
+            vertical: 14),
+
       ),
     );
   }
