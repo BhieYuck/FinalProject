@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../data/app_data.dart';
 import '../widgets/app_header.dart';
+import '../widgets/summary_card.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -13,47 +15,111 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState
     extends State<ReportsScreen> {
 
-  String filter = "Weekly";
-
-  final Map<String, int> usageData = {
-
-    "Soap": 90,
-    "Shampoo": 70,
-    "Can Goods": 50,
-    "Noodles": 30,
-
-  };
-
   @override
   Widget build(BuildContext context) {
 
-    final totalUsed =
-        usageData.values.reduce(
-                (a, b) => a + b);
+    final totalItems =
+        inventory.length;
 
-    final mostUsed =
-        usageData.entries.reduce(
-                (a, b) =>
-            a.value > b.value
-                ? a
-                : b);
+    final totalStock =
+    inventory.fold(
+      0,
+      (sum, item) =>
+      sum +
+          (item["quantity"] as int),
+    );
+
+    final totalIn =
+    transactions
+        .where(
+            (tx) =>
+        tx["type"] == "In")
+        .fold(
+      0,
+      (sum, tx) =>
+      sum +
+          (tx["qty"] as int),
+    );
+
+    final totalOut =
+    transactions
+        .where(
+            (tx) =>
+        tx["type"] == "Out")
+        .fold(
+      0,
+      (sum, tx) =>
+      sum +
+          (tx["qty"] as int),
+    );
+
+    Map<String, int>
+    usageData = {};
+
+    for (var tx
+    in transactions) {
+
+      if (tx["type"]
+          == "Out") {
+
+        final name =
+        tx["name"] as String;
+
+        usageData[name] =
+
+            (usageData[name]
+            ?? 0)
+
+                +
+
+                (tx["qty"]
+                as int);
+      }
+    }
+
+    String mostUsed =
+        "None";
+
+    if (usageData
+        .isNotEmpty) {
+
+      mostUsed =
+          usageData.entries
+              .reduce(
+                  (a, b) {
+
+                return
+                a.value >
+                    b.value
+
+                    ? a
+
+                    : b;
+
+              })
+              .key;
+    }
 
     return Scaffold(
 
       backgroundColor:
-      const Color(0xffF8FAFC),
+      const Color(
+          0xffF8FAFC),
 
       appBar:
       const AppHeader(
-        title: "Reports",
+        title:
+        "Reports",
       ),
 
       body: Padding(
 
         padding:
-        const EdgeInsets.all(16),
+        const EdgeInsets.all(
+            16),
 
-        child: ListView(
+        child:
+        ListView(
 
           children: [
 
@@ -61,302 +127,69 @@ class _ReportsScreenState
 
               children: [
 
-                filterTab("Today"),
-                filterTab("Weekly"),
-                filterTab("Monthly"),
-
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            const Text(
-
-              "Summary",
-
-              style: TextStyle(
-
-                fontSize: 22,
-                fontWeight:
-                FontWeight.bold,
-
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            Row(
-
-              children: [
-
-                summaryCard(
-                  "Total Added",
-                  "320",
+                summary(
+                  "Items",
+                  "$totalItems",
+                  Icons.inventory,
                   Colors.blue,
-                  Icons.add_box,
                 ),
 
-                const SizedBox(width: 12),
+                const SizedBox(
+                    width: 12),
 
-                summaryCard(
-                  "Total Used",
-                  "$totalUsed",
+                summary(
+                  "Stock",
+                  "$totalStock",
+                  Icons.layers,
                   Colors.green,
-                  Icons.remove_circle,
                 ),
 
               ],
             ),
 
-            const SizedBox(height: 12),
-
-            summaryCard(
-              "Most Used",
-              mostUsed.key,
-              Colors.orange,
-              Icons.star,
-            ),
-
-            const SizedBox(height: 24),
-
-            const Text(
-
-              "Most Used Items",
-
-              style: TextStyle(
-
-                fontSize: 20,
-                fontWeight:
-                FontWeight.bold,
-
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            Container(
-
-              padding:
-              const EdgeInsets.all(16),
-
-              decoration:
-              BoxDecoration(
-
-                color: Colors.white,
-
-                borderRadius:
-                BorderRadius.circular(20),
-
-                boxShadow: [
-
-                  BoxShadow(
-
-                    color:
-                    Colors.grey
-                        .withOpacity(.1),
-
-                    blurRadius: 8,
-
-                  )
-
-                ],
-              ),
-
-              child:
-              Column(
-
-                children:
-
-                usageData.entries
-                    .map(
-                        (entry){
-
-                      return buildBar(
-
-                        entry.key,
-                        entry.value,
-
-                      );
-
-                    })
-                    .toList(),
-              ),
-            ),
-
-            const SizedBox(height: 24),
+            const SizedBox(
+                height: 12),
 
             Row(
 
               children: [
 
-                Expanded(
-
-                  child:
-                  exportButton(
-
-                    "Export PDF",
-                    Icons.picture_as_pdf,
-
-                  ),
+                summary(
+                  "IN",
+                  "$totalIn",
+                  Icons.add,
+                  Colors.blue,
                 ),
 
-                const SizedBox(width: 12),
+                const SizedBox(
+                    width: 12),
 
-                Expanded(
-
-                  child:
-                  exportButton(
-
-                    "Export Excel",
-                    Icons.table_chart,
-
-                  ),
+                summary(
+                  "OUT",
+                  "$totalOut",
+                  Icons.remove,
+                  Colors.red,
                 ),
 
               ],
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(
+                height: 12),
 
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget filterTab(
-      String text) {
-
-    final selected =
-        filter == text;
-
-    return Expanded(
-
-      child: Padding(
-
-        padding:
-        const EdgeInsets.symmetric(
-            horizontal: 4),
-
-        child:
-        ElevatedButton(
-
-          onPressed: () {
-
-            setState(() {
-
-              filter = text;
-
-            });
-
-          },
-
-          style:
-          ElevatedButton
-              .styleFrom(
-
-            backgroundColor:
-
-            selected
-
-                ? const Color(
-                0xff2563EB)
-
-                : Colors.white,
-
-            foregroundColor:
-
-            selected
-
-                ? Colors.white
-
-                : Colors.black,
-
-            shape:
-            RoundedRectangleBorder(
-
-              borderRadius:
-              BorderRadius.circular(25),
-
-            ),
-          ),
-
-          child: Text(text),
-        ),
-      ),
-    );
-  }
-
-  Widget summaryCard(
-
-      String title,
-      String value,
-      Color color,
-      IconData icon,
-
-      ) {
-
-    return Expanded(
-
-      child:
-      Container(
-
-        padding:
-        const EdgeInsets.all(16),
-
-        decoration:
-        BoxDecoration(
-
-          color: Colors.white,
-
-          borderRadius:
-          BorderRadius.circular(20),
-
-          boxShadow: [
-
-            BoxShadow(
-
-              color:
-              Colors.grey
-                  .withOpacity(.1),
-
-              blurRadius: 8,
-
-            )
-
-          ],
-        ),
-
-        child:
-        Column(
-
-          children: [
-
-            Icon(
-              icon,
-              color: color,
+            summary(
+              "Most Used",
+              mostUsed,
+              Icons.star,
+              Colors.orange,
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(
+                height: 24),
 
-            Text(
+            const Text(
 
-              title,
-
-              style:
-              const TextStyle(
-
-                fontWeight:
-                FontWeight.bold,
-
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            Text(
-
-              value,
+              "Usage Chart",
 
               style:
               TextStyle(
@@ -365,14 +198,56 @@ class _ReportsScreenState
 
                 fontWeight:
                 FontWeight.bold,
-
-                color: color,
-
               ),
             ),
 
+            const SizedBox(
+                height: 16),
+
+            ...usageData.entries
+                .map(
+                    (entry) {
+
+                  return buildBar(
+
+                    entry.key,
+                    entry.value,
+
+                  );
+
+                }),
+
           ],
         ),
+      ),
+    );
+  }
+
+  Widget summary(
+
+      String title,
+      String value,
+      IconData icon,
+      Color color,
+
+      ) {
+
+    return Expanded(
+
+      child:
+      SummaryCard(
+
+        title:
+        title,
+
+        value:
+        value,
+
+        icon:
+        icon,
+
+        color:
+        color,
       ),
     );
   }
@@ -383,23 +258,6 @@ class _ReportsScreenState
       int value,
 
       ) {
-
-    Color barColor =
-    Colors.green;
-
-    if (value < 80) {
-
-      barColor =
-      Colors.orange;
-
-    }
-
-    if (value < 60) {
-
-      barColor =
-      Colors.red;
-
-    }
 
     return Padding(
 
@@ -415,20 +273,10 @@ class _ReportsScreenState
 
         children: [
 
-          Text(
+          Text(name),
 
-            name,
-
-            style:
-            const TextStyle(
-
-              fontWeight:
-              FontWeight.bold,
-
-            ),
-          ),
-
-          const SizedBox(height: 8),
+          const SizedBox(
+              height: 8),
 
           Row(
 
@@ -446,12 +294,12 @@ class _ReportsScreenState
 
                     color:
                     Colors.grey
-                        .withOpacity(.15),
+                        .withOpacity(
+                        .2),
 
                     borderRadius:
                     BorderRadius.circular(
                         20),
-
                   ),
 
                   child:
@@ -470,19 +318,19 @@ class _ReportsScreenState
                       BoxDecoration(
 
                         color:
-                        barColor,
+                        Colors.blue,
 
                         borderRadius:
                         BorderRadius.circular(
                             20),
-
                       ),
                     ),
                   ),
                 ),
               ),
 
-              const SizedBox(width: 10),
+              const SizedBox(
+                  width: 10),
 
               Text("$value"),
 
@@ -490,48 +338,6 @@ class _ReportsScreenState
           ),
 
         ],
-      ),
-    );
-  }
-
-  Widget exportButton(
-
-      String text,
-      IconData icon,
-
-      ) {
-
-    return ElevatedButton.icon(
-
-      onPressed: () {},
-
-      icon: Icon(icon),
-
-      label: Text(text),
-
-      style:
-      ElevatedButton
-          .styleFrom(
-
-        backgroundColor:
-        Colors.white,
-
-        foregroundColor:
-        const Color(
-            0xff2563EB),
-
-        shape:
-        RoundedRectangleBorder(
-
-          borderRadius:
-          BorderRadius.circular(18),
-
-        ),
-
-        padding:
-        const EdgeInsets.symmetric(
-            vertical: 14),
-
       ),
     );
   }
